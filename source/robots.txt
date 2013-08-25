@@ -2,6 +2,7 @@
 layout: nil
 ---
 User-agent: *
-Disallow: 
+Disallow: /test/ # for dev use only
+Disallow: /tmp/ # these will soon disappear
 
 Sitemap: {{ site.url }}/sitemap.xml 

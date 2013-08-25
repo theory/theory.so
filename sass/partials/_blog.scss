@@ -1,39 +1,107 @@
+#content .blog-index {
+  padding: { top: 0; bottom: 0; }
+  article { padding-top: 2em; }
+}
+
 article {
   padding-top: 1em;
   a { @extend .force-wrap; }
   header {
     position: relative;
-    padding-top: 2em;
-    padding-bottom: 1em;
-    margin-bottom: 1em;
-    background: $img-border bottom left repeat-x;
-    h1 {
-      margin: 0;
-      a { text-decoration: none;
-        &:hover { text-decoration: underline; } }
+    @media only screen and (min-width: 768px) {
+      margin-bottom: 0.5em;
+      // padding-bottom: 1em;
+      // background: $img-border bottom left repeat-x;
     }
+    .blog-index & { background: none; padding-bottom: 0; }
     p {
       font-size: .9em;
-      color: $text-color-light;
+      // hsl(220, 25, 75)
       margin: 0;
-      &.meta {
-        @extend .sans;
-        text-transform: uppercase;
-        position: absolute; top: 0;
-      }
+      color: lighten($text-color-light, 10);
+      &.meta { @extend .sans; padding-top: 0.5em; }
     }
-    @media only screen and (min-width: 768px) {
-      margin-bottom: 1.5em;
-      padding-bottom: 1em;
-      background: $img-border bottom left repeat-x;
+    // time { text-transform: uppercase; }
+  }
+  .entry-title {
+    margin: 0;
+    a {
+     border-color: transparent;
+    }
+    .blog-index & {
+      font-size: $h1;
+      a { color: inherit; &:hover { color: $link-color-hover; } }
     }
   }
+
+  a[rel=bookmark] { text-decoration: none; }
+
   h2 {
     padding-top: 0.8em;
+    // background: $img-border top left repeat-x;
+  }
+  h2:first-child, header + h2 { background: none; }
+  &[data-linklog] {
+    .entry-title {
+      font-size: $h1;
+      // a { text-decoration: underline; }
+      a {
+        color: inherit;
+        border: 1px solid $title-color;
+        border-width: 0 0 1px 0;
+        @media only screen and (min-width: 768px) {
+           padding-bottom: 0.05em;
+        }
+        margin-bottom: 1em;
+        &:hover { text-decoration: none; border-color: $header-link-color; }
+      }
+    }
+    .blog-index & .entry-title { font-size: $h2; }
+  }
+
+  .linklog-marker {
+    color: $text-color-light;
+    font-size: .8em;
+    line-height: 1em;
+    position: relative; top: -.15em;
+  }
+
+  > footer {
+    color: $text-color-light;
+    padding-bottom: 2.5em;
+    margin-top: 2em;
+    @extend .sans;
+    .blog-index & { margin-top: 1em; }
+    .meta {
+      margin-top: .75em;
+      margin-bottom: .75em;
+      font-size: .85em;
+      clear: both;
+      overflow: hidden;
+    }
+    .byline + time:before, time +time:before, .comments:before, .byline ~ .categories:before {
+      @extend .separator;
+    }
+  }
+
+}
+#content .blog-index {
+  a[rel=full-article] {
+    display: inline-block;
+    padding: .4em .8em;
+    margin-right: .5em;
+    text-decoration: none;
+    // color: mix($text-color, $text-color-light);
+    @extend .serif;
+    @include transition(background-color .5s);
+    &:hover {
+      text-shadow: none;
+    }
+  }
+  .blog-index & + article {
     background: $img-border top left repeat-x;
   }
-  .entry-content & h2:first-child, header + h2 { padding-top: 0; }
-  h2:first-child, header + h2 { background: none; }
+
   .feature {
     padding-top: .5em;
     margin-bottom: 1em;
@@ -42,6 +110,7 @@ article {
     font-size: 2.0em; font-style: italic;
     line-height: 1.3em;
   }
+
   img, video, .flash-video {
     @extend .flex-content;
     @extend .basic-alignment;
@@ -66,68 +135,21 @@ article {
       }
     }
   }
-  > footer {
-    padding-bottom: 2.5em;
-    margin-top: 2em;
-    @extend .sans;
-    p.meta {
-      margin-bottom: .8em;
-      font-size: .85em;
-      clear: both;
-      overflow: hidden;
-    }
-    .byline + time:before, time +time:before, .comments:before, .byline ~ .categories:before {
-      @extend .separator;
-    }
-  }
-
-}
-article + article {
-  .blog-index & {
-    background: $img-border top left repeat-x;
-  }
-}
-#content .blog-index {
-  padding: { top: 0; bottom: 0; }
-  article { padding-top: 2em; }
-  article header { background: none; padding-bottom: 0; }
-  article h1 {
-    font-size: 2.2em;
-    a { color: inherit; &:hover { color: $link-color-hover; } }
-  }
-  a[rel=full-article] {
-    background: darken($main-bg, 5);
-    display: inline-block;
-    padding: .4em .8em;
-    margin-right: .5em;
-    text-decoration: none;
-    color: mix($text-color, $text-color-light);
-    @extend .serif;
-    @include transition(background-color .5s);
-    &:hover {
-      background: $link-color-hover;
-      text-shadow: none;
-      color: $main-bg;
-    }
-  }
-  footer {
-    @extend .sans;
-    margin-top: 1em;
-  }
 }
 
 .separator {
-  content: "\2022 ";
+  content: "—";
   padding: 0 .4em 0 .2em;
   display: inline-block;
 }
 
 #content div.pagination {
+  @include pie-clearfix;
   text-align: center;
   font-size: .95em;
   position: relative;
-  background: $img-border top left repeat-x;
   padding: {top: 1.5em; bottom: 1.5em;}
+  border-top: 1px solid #fff;
   a {
     text-decoration: none;
     color: $text-color-light;
