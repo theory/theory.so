@@ -62,8 +62,8 @@ Contact Me
     <dd itemprop="url"><a href="https://alpha.app.net/theory">@theory</a></dd>
     <dt>GitHub:</dt>
     <dd itemprop="url"><a href="https://github.com/theory">@theory</a></dd>
-    <dt>CPAN:</dt>
-    <dd itemprop="url"><a href="https://metacpan.org/author/DWHEELER">@dwheeler</a></dd>
+    <dt>PGXN:</dt>
+    <dd itemprop="url"><a href="http://pgxn.org/user/theory>@theory</a></dd>
 </dl>
 </section>
 
