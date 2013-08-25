@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[theory.so]]></title>
+  <link href="http://theory.so/atom.xml" rel="self"/>
+  <link href="http://theory.so/"/>
+  <updated>2013-08-25T18:15:00+02:00</updated>
+  <id>http://theory.so/</id>
+  <author>
+    <name><![CDATA[David E. Wheeler]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+</feed>

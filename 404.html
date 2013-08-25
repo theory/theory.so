@@ -9,7 +9,7 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content=" Blog Archives ">
+  <meta name="description" content="Page not found Sorry about that! Unfortunately the page you were looking for could not be found. It might have been removed, lost or never existed. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://theory.so">
+  <link rel="canonical" href="http://theory.so/404.html">
   <link href="/favicon.ico" rel="icon">
   
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -70,14 +70,35 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article role="article">
   
-  <div class="pagination">
+  <header>
+  <h1 class="entry-title">Page not found</h1>
+  <p class="meta">Sorry about that!</p>
+</header>
+
+<p>
+  Unfortunately the page you were looking for could not be found. It might have
+  been removed, lost or never existed. You could try and find it using the
+  <script>
+    var arrURL = document.URL.split("/");
+    var arrParams = arrURL[3].split("?");
+    var searchParam = arrParams[0].substr(0, arrParams[0].lastIndexOf("."));
     
-    <a href="/archives">Blog Archives</a>
-    
-  </div>
+    document.write('<a href="http://google.com/search?q=site:theory.so ' + searchParam + '">search</a>')
+  </script>
+  <noscript><a href="http://google.com/search?q=site%3Atheory.so">search</a></noscript>
+  box (top right corner), browse the
+  <a href="/archives">archives</a> or go to the
+  <a href="/">frontpage</a>.
+</p>
+
+  
+</article>
+
 </div>
+
 
     </div>
   </div>
