@@ -1,0 +1,3 @@
+[submodule ".themes/theory-theme"]
+	path = .themes/theory-theme
+	url = https://github.com/theory/theory-theme.git
