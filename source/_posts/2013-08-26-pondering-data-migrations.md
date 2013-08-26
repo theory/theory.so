@@ -89,9 +89,10 @@ should change nothing in Sqitch with regard to data deployments. A better
 solution than the above, I believe, is organizational.
 
 Let the best practice for data deployments be this: they should be contained
-in q Sqitch changes, but such changes should contain *only* data modifcations.
-No change script should both define a table and its initial rows. Keep the
-table and its data in separate changes -- keep DML separate from DDL.
+in q Sqitch changes, but such changes should contain *only* data
+modifications. No change script should both define a table and its initial
+rows. Keep the table and its data in separate changes -- keep DML separate
+from DDL.
 
 For our list of countries, we might have a change named "countries", which
 creates the `countries` table, and another, named "country_data", which
