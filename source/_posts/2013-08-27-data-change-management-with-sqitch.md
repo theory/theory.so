@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Pondering Data Migrations"
+title: "Data Change Management with Sqitch"
 date: 2013-08-27 11:38
 comments: true
 external-url: 
