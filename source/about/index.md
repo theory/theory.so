@@ -82,4 +82,3 @@ license for which can be
 text is set in [Source Sans Pro](https://github.com/adobe/source-sans-pro) and
 [Source Code Pro](https://github.com/adobe/source-code-pro), released by Adobe under the
 [Open Font License](https://github.com/adobe/source-code-pro/blob/master/LICENSE.txt).
-
