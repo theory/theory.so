@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Pondering Data Migrations"
-date: 2013-08-26 11:38
+date: 2013-08-27 11:38
 comments: true
 external-url: 
 categories: [sqitch, data]
