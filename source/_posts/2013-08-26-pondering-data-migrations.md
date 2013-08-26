@@ -30,8 +30,8 @@ reasons:
 Now that we have multiple Sqitch-deployed databases in production, the time
 has come to address these issues.
 
-Deploy Hooks
-------------
+Deploy Hooks for External Sources
+---------------------------------
 
 I propose to resolve the one-time migration requirement with [deploy hooks].
 The idea is similar to [Git hooks]: Before or after any `sqitch deploy`, one
@@ -53,8 +53,8 @@ notification announcing a deployment (though that might require adding support
 for [non-SQL scripts]). There are all kinds of things for which hooks will
 prove useful.
 
-Static Data Maintenance
------------------------
+Changes for Static Data Maintenance
+-----------------------------------
 
 For data that must be tied to the deployment process, there are two
 complications to simply managing them in normal Sqitch changes:
