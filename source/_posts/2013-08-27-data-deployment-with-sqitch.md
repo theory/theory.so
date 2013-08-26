@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Data Change Management with Sqitch"
+title: "Data Deployment with Sqitch"
 date: 2013-08-27 11:38
 comments: true
 external-url: 
