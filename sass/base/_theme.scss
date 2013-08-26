@@ -67,19 +67,27 @@ $article-border: $footer-border-top !default;
 a {
   @include link-colors($link-color, $hover: $link-color-hover, $focus: $link-color-hover, $visited: $link-color-visited, $active: $link-color-active);
   text-decoration: none;
-  border: 1px solid $link-color;
-  border-color: lighten($link-color, 50);
-  border-width: 0 0 1px 0;
   &:hover {
     background-color: lighten($link-color, 50);
     border-color: $link-color;
   }
+  &:hover * {
+    background-color: lighten($link-color, 50);
+  }
+}
+
+.entry-content a, .entry-content a * {
+  border: 1px solid lighten($link-color, 50) !important;
+  border-width: 0 0 1px 0 !important;
 }
 aside.sidebar a {
   @include link-colors($sidebar-link-color, $hover: $sidebar-link-color-hover, $focus: $sidebar-link-color-hover, $active: $sidebar-link-color-active);
 }
 a {
   @include transition(color,border,background .3s);
+}
+a * {
+  @include transition(border,background .3s);
 }
 
 html {
