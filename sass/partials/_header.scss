@@ -35,7 +35,7 @@ body > header {
       text-decoration: none;
       border: none;
     }
-    a:hover {
+    a:hover, a:hover * {
       background-color: transparent;
     }
   }
