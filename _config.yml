@@ -13,7 +13,7 @@ description:
 # You can customize the format as defined in
 # http://www.ruby-doc.org/core-1.9.2/Time.html#method-i-strftime
 # Additionally, %o will give you the ordinal representation of the day
-date_format: "%A, %e %B %Y"
+date_format: "%e %B %Y"
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
 subscribe_rss: /atom.xml
@@ -44,7 +44,7 @@ pygments: false # default python pygments have been replaced by pygments.rb
 paginate: 10          # Posts per page on the blog index
 pagination_dir:   # Directory base for pagination URLs eg. /page/2/
 recent_posts: 5       # Posts in the sidebar Recent Posts section
-excerpt_link: "do continue →"  # "Continue reading" link text at the bottom of excerpted articles
+excerpt_link: "CONTINUE →"  # "Continue reading" link text at the bottom of excerpted articles
 excerpt_in_feed: false # Truncate excerpted articles in the atom feed
 permalink_label: "§"
 permalink_label_feed: "§"
@@ -101,11 +101,11 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name: theorypm
+disqus_short_name: theoryso
 disqus_show_comment_count: false
 
 # Google Analytics
-google_analytics_tracking_id: UA-42757636-1
+google_analytics_tracking_id: UA-43606412-1
 
 # Facebook Like
 facebook_like: true
