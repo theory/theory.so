@@ -169,10 +169,9 @@ Custom Table Name
 -----------------
 
 What if you want to name the change one thing and the table it creates
-something else? What if you want to schema-qualify the table? Easy! Sqitch
-uses [Template::Tiny] by default for templating. It's a dead simple templating
-language, but features simple `if` statements. Try using them with custom
-variables for the schema and table names:
+something else? What if you want to schema-qualify the table? Easy! Sqitch's
+dead simple default [templating language] features `if` statements. Try using
+them with custom variables for the schema and table names:
 
 ``` sql Deploy table with schema and table
 SET search_path TO [% IF schema ][% schema %],[% END %]public;
@@ -250,11 +249,78 @@ CREATE TABLE widgets (
 COMMIT;
 ```
 
-
+[templating language]: https://metacpan.org/module/sqitch-add#Syntax "Sqitch Template Syntax"
 
 Add Columns
 -----------
 
-Sqitch uses [Template::Tiny] by default for templating. It's a dead simple
-templating language, but flexible enough to handle lists of values, which is
-how dependencies are listed in comments by the default template.
+Sqitch templates allow array values in variables. The default templates takes
+advantage of this feature to list dependencies in SQL comments. It works great
+for custom variables, too. For the purposes of our `CREATE TABLE` template,
+let's exploit this feature to add columns. Replace the `-- Add columns here`
+comment in the deploy simple with these three lines:
+
+``` sql Deploy script with columns
+[% FOREACH col IN column -%]
+    [% col %] TEXT NOT NULL,
+[% END -%]
+```
+
+The verify scripte can make similar improvements. Change its `SELECT`
+statement code to:
+
+``` sql Verify script with columns
+SELECT [% FOREACH col IN column %][% col %], [% END %]
+  FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
+```
+
+Just pass multiple `--set` (or `-s`) options to `sqitch add` to add as many
+columns as you like:
+
+``` sh Add table with columns
+> sqitch add corp_widgets --template createtable \
+  -s schema=corp -s table=widgets \
+  -s column=id -s column=name -s column=quantity \
+  -n 'Add corp.widgets table.'
+```
+
+Behold the resulting deploy script!
+
+``` sql Deploy table with columns
+-- Deploy corp_widgets
+
+BEGIN;
+
+SET search_path TO corp,public;
+
+CREATE TABLE widgets (
+    id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    quantity TEXT NOT NULL,
+);
+
+COMMIT;
+```
+
+You still have to edit the resulting file, of course. Maybe `NULL`s should be
+allowed in the `name` column. And I suspect that `quantity` ought be an
+integer. There's that pesky trailing comma to remove, too. The verify script
+suffers the same comma:
+
+``` sql Verify each column
+-- Verify corp_widgets
+
+BEGIN;
+
+SET search_path TO corp,public;
+SELECT id, name, quantity, 
+  FROM widgets;
+
+ROLLBACK;
+```
+
+Still, these templates remove much of the grudge work of adding `CREATE TABLE`
+changes.
+
+Upgraded Templates
+------------------
