@@ -3,7 +3,7 @@ layout: post
 title: "Sqitch Templating"
 date: 2013-09-06 13:44
 comments: true
-external-url: 
+external-url:
 published: false
 categories: [sqitch]
 ---
@@ -164,3 +164,97 @@ ROLLBACK;
 ```
 
 [`sqitch add`]: http://metacpan.org/module/sqitch-add "Add a database change to the Sqitch plan"
+
+Custom Table Name
+-----------------
+
+What if you want to name the change one thing and the table it creates
+something else? What if you want to schema-qualify the table? Easy! Sqitch
+uses [Template::Tiny] by default for templating. It's a dead simple templating
+language, but features simple `if` statements. Try using them with custom
+variables for the schema and table names:
+
+``` sql Deploy table with schema and table
+SET search_path TO [% IF schema ][% schema %],[% END %]public;
+
+CREATE TABLE [% IF table %][% table %][% ELSE %][% change %][% END %] (
+    -- Add columns here.
+);
+```
+
+If the `schema` variable is set, the `search_path`, which determines where
+objects will go, gets set to `$schema,public`. If `schema` is not set, the
+path is simply `public`, which is the default schema in Postgres.
+
+We take a similar tack with the `CREATE TABLE` statement: If the `table`
+variable is set, it's used as the name of the table. Otherwise, we use the
+change name, as before.
+
+The revert script needs the same treatment:
+
+``` sql Revert table with schema and table
+SET search_path TO [% IF schema ][% schema %],[% END %]public;
+DROP TABLE [% IF table %][% table %][% ELSE %][% change %][% END %];
+```
+
+As does the verify script:
+
+``` sql Verify table with schema and table
+SET search_path TO [% IF schema ][% schema %],[% END %]public;
+SELECT * FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
+```
+
+Take it for a spin:
+
+``` sh Add table to schema
+> sqitch add corp_widgets --template createtable \
+  --set schema=corp --set table=widgets \
+  -n 'Add corp.widgets table.'
+Created deploy/corp_widgets.sql
+Created revert/corp_widgets.sql
+Created verify/corp_widgets.sql
+Added "corp_widgets" to sqitch.plan
+```
+
+The resulting deploy script will create `corp.widgets`:
+
+``` sql Deploy table to schema
+-- Deploy corp_widgets
+
+BEGIN;
+
+SET search_path TO corp,public;
+
+CREATE TABLE widgets (
+    -- Add columns here.
+);
+
+COMMIT;
+```
+
+Cool, right? The revert and verify scripts of course get a similar treatment.
+Omitting the `--set` options, as in `sqitch add widgets --template createtable`,
+the template falls back on the change name:
+
+``` sql Deploy a table to public
+-- Deploy widgets
+
+BEGIN;
+
+SET search_path TO public;
+
+CREATE TABLE widgets (
+    -- Add columns here.
+);
+
+COMMIT;
+```
+
+
+
+Add Columns
+-----------
+
+Sqitch uses [Template::Tiny] by default for templating. It's a dead simple
+templating language, but flexible enough to handle lists of values, which is
+how dependencies are listed in comments by the default template.
