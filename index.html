@@ -9,10 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="Dimitri Fontaine: There was SQL before
-window functions
-and SQL after window functions: that&rsquo;s how powerful this tool is. Being
-that of a deal &hellip;">
+  <meta name="description" content="Yeseterday saw the v.980 release of Sqitch, a database change management
+system. The headline feature in this version is support for MySQL 5.6.4 or &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +72,78 @@ that of a deal &hellip;">
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+
+
+
+
+
+
+    <article >
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="/sqitch/2013/09/06/sqitch-templating/">Sqitch Templating</a>
+
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-06T13:44:00-07:00" pubdate data-updated="true"> 6 September 2013</time>
+        
+         &bull; <a rel="bookmark" href="/sqitch/2013/09/06/sqitch-templating/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>Yeseterday saw the v.980 release of <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, a database change management
+system. The headline feature in this version is support for <a href="http://dev.mysql.com/" title="The world's most popular open source database">MySQL</a> 5.6.4 or
+higher. Why 5.6.4 rather than 5.1 or even 5.5? Mainly because 5.6.4 finally
+added support for fractional seconds in <code>DATETIME</code> columns (details in the
+<a href="https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-4.html" title="Changes in MySQL 5.6.4 (2011-12-20, Milestone 7)">release notes</a>). This feature is essential for Sqitch, because changes often
+execute within a second of each other, and the deploy time is included in the
+log table&rsquo;s primary key.</p>
+
+<p>With the requirement for fractional seconds satisfied by 5.6.4, there was
+nothing to prevent usage of <a href="http://dev.mysql.com/doc/refman/5.5/en/condition-handling.html" title="MySQL 5.5 Reference Manual: Condition Handling"><code>SIGNAL</code></a>, added in 5.5, to
+<a href="http://stackoverflow.com/a/17424570/79202" title="How do I get MySQL to throw a conditional runtime exception in SQL">mimic check constraints</a> in a trigger. This brings the Sqitch MySQL
+implementation into line with what was already possible in the Postgres,
+SQLite, and Oracle support. Check out the <a href="https://metacpan.org/module/sqitchtutorial-mysql" title="A tutorial introduction to Sqitch change management on MySQL">tutorial</a> and the accompanying
+<a href="https://github.com/theory/sqitch-mysql-intro" title="Sqitch MySQL Intro Sample Repository">Git repository</a> to get started managing your MySQL databases with Sqitch.</p>
+
+<p>The MySQL support might be the headliner, but the change in v0.980 I&rsquo;m most
+excited about is improved template support. Sqitch executes templates to
+create the default deploy, revert, and verify scripts, but up to now they have
+not been easy to customize. With v0.980, you can create as many custom
+templates as you like, and use them as appropriate.</p>
+
+</div>
+  <footer>
+    <a rel="full-article" href="/sqitch/2013/09/06/sqitch-templating/">CONTINUE →</a>
+  </footer>
+
+
+    </article>
   
     
     
