@@ -7,7 +7,7 @@ external-url:
 categories: [sqitch]
 ---
 
-Yeseterday saw the v.980 release of [Sqitch], a database change management
+Last week saw the v.980 release of [Sqitch], a database change management
 system. The headline feature in this version is support for [MySQL] 5.6.4 or
 higher. Why 5.6.4 rather than 5.1 or even 5.5? Mainly because 5.6.4 finally
 added support for fractional seconds in `DATETIME` columns (details in the
@@ -266,7 +266,7 @@ simple with these three lines:
 [% END -%]
 ```
 
-We can similarly improe the verify script: change its `SELECT` statement to:
+We can similarly improve the verify script: change its `SELECT` statement to:
 
 ``` sql Verify script with columns
 SELECT [% FOREACH col IN column %][% col %], [% END %]
