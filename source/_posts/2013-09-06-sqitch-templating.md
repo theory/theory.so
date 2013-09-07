@@ -4,7 +4,6 @@ title: "Sqitch Templating"
 date: 2013-09-06 13:44
 comments: true
 external-url:
-published: false
 categories: [sqitch]
 ---
 
@@ -170,8 +169,9 @@ Custom Table Name
 
 What if you want to name the change one thing and the table it creates
 something else? What if you want to schema-qualify the table? Easy! Sqitch's
-dead simple default [templating language] features `if` statements. Try using
-them with custom variables for the schema and table names:
+dead simple default [templating language], [Template::Tiny], features `if`
+statements. Try using them with custom variables for the schema and table
+names:
 
 ``` sql Deploy table with schema and table
 SET search_path TO [% IF schema ][% schema %],[% END %]public;
@@ -231,9 +231,8 @@ CREATE TABLE widgets (
 COMMIT;
 ```
 
-Cool, right? The revert and verify scripts of course get a similar treatment.
-Omitting the `--set` options, as in `sqitch add widgets --template createtable`,
-the template falls back on the change name:
+Cool, right? The revert and verify scripts of course yield similar results.
+Omitting the `--set` option, the template falls back on the change name:
 
 ``` sql Deploy a table to public
 -- Deploy widgets
@@ -249,16 +248,17 @@ CREATE TABLE widgets (
 COMMIT;
 ```
 
+[Template::Tiny]: https://metacpan.org/module/Template::Tiny
 [templating language]: https://metacpan.org/module/sqitch-add#Syntax "Sqitch Template Syntax"
 
 Add Columns
 -----------
 
-Sqitch templates allow array values in variables. The default templates takes
+Template variables may contain array values. The default templates takes
 advantage of this feature to list dependencies in SQL comments. It works great
 for custom variables, too. For the purposes of our `CREATE TABLE` template,
-let's exploit this feature to add columns. Replace the `-- Add columns here`
-comment in the deploy simple with these three lines:
+let's add columns. Replace the `-- Add columns here` comment in the deploy
+simple with these three lines:
 
 ``` sql Deploy script with columns
 [% FOREACH col IN column -%]
@@ -266,8 +266,7 @@ comment in the deploy simple with these three lines:
 [% END -%]
 ```
 
-The verify scripte can make similar improvements. Change its `SELECT`
-statement code to:
+We can similarly improe the verify script: change its `SELECT` statement to:
 
 ``` sql Verify script with columns
 SELECT [% FOREACH col IN column %][% col %], [% END %]
@@ -305,7 +304,7 @@ COMMIT;
 You still have to edit the resulting file, of course. Maybe `NULL`s should be
 allowed in the `name` column. And I suspect that `quantity` ought be an
 integer. There's that pesky trailing comma to remove, too. The verify script
-suffers the same comma:
+suffers the same deficiency:
 
 ``` sql Verify each column
 -- Verify corp_widgets
@@ -320,7 +319,97 @@ ROLLBACK;
 ```
 
 Still, these templates remove much of the grudge work of adding `CREATE TABLE`
-changes.
+changes, giving you the scaffolding on which to build the objects you need.
 
 Upgraded Templates
 ------------------
+
+We call Sqitch's [templating language] "default" because it can be replaced
+with a more capable one. Simply install [Template Toolkit] to transparently
+upgrade your Sqitch templates. Template Toolkit's comprehensive feature set
+covers just about any functionality you could want out of a templating system.
+It's big and complex, but relatively straight-forward to install: just run
+`cpan Template`, `cpanm Tempate`, `yum install perl-Template-Toolkit`, or the
+like and you'll be in business.
+
+We can resolve the trailing comma issue thanks to Template Toolkit's `loop`
+variable, which is implicitly created in the `FOREACH` loop. Simply replace
+the comma in the template with the expression `[% loop.last ? '' : ',' %]`:
+
+``` sql Use the loop variable
+[% FOREACH col IN column -%]
+    [% col %] TEXT NOT NULL[% loop.last ? '' : ',' %]
+[% END -%]
+```
+
+Now the comma will be omitted for the last iteration of the loop. The fix for
+the verify script is even simpler: use `join()` [VMethod] instead of a
+`FOREACH` loop to emit all the columns in a single expression:
+
+``` sql Join verify columns
+SELECT [% column.join(', ') %]
+  FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
+```
+
+Really simplifies things, doesn't it?
+
+Better still, going back to the deploy template, we can add data types for
+each column. Try this on for size:
+
+``` sh Deploy with typed columns
+[% FOREACH col IN column -%]
+    [% col %] [% type.item( loop.index ) or 'TEXT' %] NOT NULL[% loop.last ? '' : ',' %]
+[% END -%]
+);
+```
+
+As we iterate over the list of columns, simply pass `loop.index` to the
+`item()` [VMethod] on the `type` variable to get the corresponding type.
+Then specify a type for each column when you create the change:
+
+``` sh Create table with typed columns
+> sqitch add corp_widgets --template createtable \
+  -s schema=corp -s table=widgets \
+  -s column=id -s type=SERIAL \
+  -s column=name -s type=TEXT \
+  -s column=quantity -s type=INTEGER \
+  -n 'Add corp.widgets table.'
+```
+
+This yields a much more comprehensive deploy script:
+
+``` sql Deploy table with typed columns
+-- Deploy corp_widgets
+
+BEGIN;
+
+SET search_path TO corp,public;
+
+CREATE TABLE widgets (
+    id SERIAL NOT NULL,
+    name TEXT NOT NULL,
+    quantity INTEGER NOT NULL
+);
+
+COMMIT;
+```
+
+[Template Toolkit]: http://tt2.org/
+[VMethod]: http://tt2.org/docs/manual/VMethods.html "Template Toolkit Docs: Virtual Methods"
+
+Go Crazy
+--------
+
+The basics for creating task-specific change templates are baked into Sqitch,
+and a transparent upgrade to advanced templating is a simple install away. I
+can imagine lots of uses for task-specific changes, including:
+
+* Adding schemas, users, procedures, and views
+* Modifying tables to add columns, constraints and indexes
+* Inserting or Updating data
+
+Maybe folks will even start sharing templates! You should subscribe to the
+[mail list] to find out. See you there?
+
+[mail list]: https://groups.google.com/forum/#!forum/sqitch-users
+
