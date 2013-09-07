@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sqitch | theory.so]]></title>
   <link href="http://theory.so/categories/sqitch/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-09-06T17:46:10-07:00</updated>
+  <updated>2013-09-06T17:48:00-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -24,7 +24,7 @@
 <updated>2013-09-06T13:44:00-07:00</updated>
 <id>http://theory.so/sqitch/2013/09/06/sqitch-templating</id>
 
-      <content type="html"><![CDATA[<p>Yeseterday saw the v.980 release of <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, a database change management
+      <content type="html"><![CDATA[<p>Last week saw the v.980 release of <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, a database change management
 system. The headline feature in this version is support for <a href="http://dev.mysql.com/" title="The world's most popular open source database">MySQL</a> 5.6.4 or
 higher. Why 5.6.4 rather than 5.1 or even 5.5? Mainly because 5.6.4 finally
 added support for fractional seconds in <code>DATETIME</code> columns (details in the
@@ -270,7 +270,7 @@ simple with these three lines:</p>
 [% END -%]
 </code></p>
 
-<p>We can similarly improe the verify script: change its <code>SELECT</code> statement to:</p>
+<p>We can similarly improve the verify script: change its <code>SELECT</code> statement to:</p>
 
 <p><code>sql Verify script with columns
 SELECT [% FOREACH col IN column %][% col %], [% END %]
