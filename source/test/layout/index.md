@@ -209,7 +209,9 @@ end
 
 Gist Embedding:
 
-{% gist 996818 %}
+(Disabled for now pending a fix for [this bug](https://github.com/imathis/octopress/pull/1363).)
+
+    {-% gist 5908699 %-}
 
 Include:
 
