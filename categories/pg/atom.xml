@@ -4,7 +4,7 @@
   <title><![CDATA[Category: pg | theory.so]]></title>
   <link href="http://theory.so/categories/pg/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-09-29T14:46:30-07:00</updated>
+  <updated>2013-09-29T14:58:04-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,36 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[→ The Power of Enums]]></title>
+<link href="http://www.openscg.com/2013/09/the-power-of-enums/"/>
+<updated>2013-09-29T14:50:00-07:00</updated>
+<id>http://theory.so/pg/2013/09/29/the-power-of-enums</id>
+
+      <content type="html"><![CDATA[<p>Jim Mlodgenski on using <a href="http://www.postgresql.org/docs/9.3/static/datatype-enum.html&lt;p>&lt;a">Enums</a> in place of references to small lookup tables:</p>
+
+<blockquote><p>I saw something else I didn’t expect: […] There was a 8% increase
+in performance. I was expecting the test with the enums to be close
+to the baseline, but I wasn’t expecting it to be faster. Thinking
+about it, it makes sense. Enums values are just numbers so we’re
+effectively using surrogate keys under the covers, but the users would
+still the the enum labels when they are looking at the data. It ended
+up being a no brainer to use enums for these static tables. There was
+a increase in performance while still maintaining the integrity of the
+data.</p></blockquote>
+
+<p>I&rsquo;ve been a big fan of Enums since Andrew and Tom Dunstan released a patch for
+them during the PostgreSQL 8.2 era. Today they&rsquo;re a core feature, and as of
+9.1, you can even modify their values! You&rsquo;re missing out if you&rsquo;re not using
+them yet.</p>
+]]></content>
+    </entry>
   
     <entry>
       
