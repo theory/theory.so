@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: impala | theory.so]]></title>
+  <link href="http://theory.so/categories/impala/atom.xml" rel="self"/>
+  <link href="http://theory.so/"/>
+  <updated>2013-09-29T14:46:30-07:00</updated>
+  <id>http://theory.so/</id>
+  <author>
+    <name><![CDATA[David E. Wheeler]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[→ Whither Impala Fault Tolerance?]]></title>
+<link href="http://blog.cloudera.com/blog/2013/09/whats-next-for-impala-after-release-1-1/"/>
+<updated>2013-09-29T14:29:00-07:00</updated>
+<id>http://theory.so/impala/2013/09/29/whither-impala-fault-tolerance</id>
+
+      <content type="html"><![CDATA[<p>Justin Erickson on the <a href="http://blog.cloudera.com/">Cloudera Blog</a></p>
+
+<blockquote><p>In December 2012, while Cloudera Impala was still in its beta phase, we
+<a href="http://blog.cloudera.com/blog/2012/12/whats-next-for-cloudera-impala/">provided a roadmap</a>
+for planned functionality in the production release. In the same spirit of
+keeping Impala users, customers, and enthusiasts well informed, this post
+provides an updated roadmap for upcoming releases later this year and in early
+2014.</p></blockquote>
+
+<p><a href="http://www.cloudera.com/content/cloudera/en/products/cdh/impala.html">Impala</a> is a pretty nice-looking SQLish query engine that runs on Hadoop. It
+provides the same basic interface as <a href="http://hive.apache.org/">Hive</a>, but circumvents MapReduce to
+access data directly from data nodes in parallel. But, in my opinion, to be
+useful as a real-time query engine, it needs fault tolerance. From the
+<a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/Impala/latest/Cloudera-Impala-Frequently-Asked-Questions/Cloudera-Impala-Frequently-Asked-Questions.html">Impala FAQ</a>, under the list of unsupported features:</p>
+
+<blockquote><p>Fault tolerance for running queries (not currently). In the current release,
+Impala aborts the query if any host on which the query is executing fails. In
+the future, we will consider adding fault tolerance to Impala, so that a
+running query would complete even in the presence of host failures.</p></blockquote>
+
+<p>Sounds like an unfortunate issue. Since it&rsquo;s pretty typical for data nodes to
+go down, this seems like an essential feature. Products like <a href="http://citusdata.com/docs/sql-on-hadoop" title="CitusDB SQL on Hadoop">CitusDB</a> offer
+fault tolerance:</p>
+
+<blockquote><p><strong>Does CitusDB recover from failures?</strong></p>
+
+<p>Yes. The CitusDB master node intelligently re-routes the work on any failed
+nodes to the remaining nodes in real-time. Since the underlying data are kept
+in fixed-size blocks in HDFS, a failed node&rsquo;s work can evenly be distributed
+among the remaining nodes in the cluster.</p></blockquote>
+
+<p>That sound exactly right. I&rsquo;m excited about Citus, and if it adds solid
+support for more data formats, such as <a href="http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.0.0.2/ds_Hive/orcfile.html" title="ORC File Format">ORC</a> and <a href="http://parquet.io/" title="Parquet is a columnar storage format for Hadoop.">Parquet</a>, it may well be the
+way to go. But Impala will be a nice alternative if it can get fault tolerance
+figured out. I&rsquo;m disappointed it&rsquo;s not on the road map.</p>
+
+<p><a rel="bookmark" href="http://theory.so/impala/2013/09/29/whither-impala-fault-tolerance/">§</a></p>
+
+]]></content>
+    </entry>
+  
+</feed>
+
