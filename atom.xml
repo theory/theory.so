@@ -4,7 +4,7 @@
   <title><![CDATA[theory.so]]></title>
   <link href="http://theory.so/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-09-29T14:58:04-07:00</updated>
+  <updated>2013-10-23T14:27:17-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,227 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[Testing Nested hstore]]></title>
+<link href="http://theory.so/pg/2013/10/23/testing-nested-hstore/"/>
+<updated>2013-10-23T10:26:00-07:00</updated>
+<id>http://theory.so/pg/2013/10/23/testing-nested-hstore</id>
+
+      <content type="html"><![CDATA[<p>I&rsquo;ve been helping Oleg Bartunov and Teodor Sigaev with documentation for the
+forthcoming <a href="http://www.sai.msu.su/~megera/postgres/talks/hstore-pgcon-2013.pdf">nested hstore</a> patch for <a href="http://www.posrgresql.org/">PostgreSQL</a>. It adds support for
+arrays, numeric and boolean types, and of course arbitrarily nested data
+structures. This gives it feature parity with <a href="http://json.org/">JSON</a>, but unlike the
+<a href="http://www.postgresql.org/docs/current/static/datatype-json.html">JSON type</a>, its values are stored in a binary representation, which makes it
+much more efficient to query. The support for <a href="http://www.postgresql.org/docs/current/static/gist.html">GiST</a> and <a href="http://www.postgresql.org/docs/current/static/gin.html">GIN</a> indexes to
+speed up path searches doesn&rsquo;t hurt, either.</p>
+
+<p>As part of the documentation, we wanted to include a short tutorial, something
+to show off the schemaless flexibility of the new hstore. The <a href="http://citusdata.com/">CitusDB</a> guys
+were kind enough to show off their <a href="https://github.com/citusdata/json_fdw">json_fdw</a> with some Amazon review data in
+a <a href="http://citusdata.com/blog/65-run-sql-on-json-files-without-any-data-loads">blog post</a> a few months back; it even includes an interesting query against
+the data. Let&rsquo;s see what we can do with it. First, load it:</p>
+
+<figure class='code'><figcaption><span>Load Amazon Reviews as hstore</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt; createdb reviews
+</span><span class='line'>&gt; psql -d reviews -c <span class="s1">&#39;</span>
+</span><span class='line'><span class="s1">    CREATE EXTENSION HSTORE;</span>
+</span><span class='line'><span class="s1">    CREATE TABLE reviews(review hstore);</span>
+</span><span class='line'><span class="s1">&#39;</span>
+</span><span class='line'>CREATE TABLE
+</span><span class='line'>&gt; gzcat customer_reviews_nested_1998.json.gz | sed -e <span class="s1">&#39;s/\\/\\\\/g&#39;</span> <span class="se">\</span>
+</span><span class='line'> | sed -e <span class="s2">&quot;s/&#39;/&#39;&#39;/g&quot;</span> | sed -e <span class="s1">&#39;s/&quot;:/&quot; =&gt;/g&#39;</span> &gt; /tmp/hstore.copy
+</span><span class='line'>&gt; <span class="nb">time </span>psql -d reviews -c <span class="s2">&quot;COPY reviews FROM &#39;/tmp/hstore.copy&#39;&quot;</span>
+</span><span class='line'>COPY 589859
+</span><span class='line'>       0.00s user 0.00s system 0% cpu 13.059 total
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>13 seconds to load 589,859 records from a file &ndash; a little over 45k records
+per second. Not bad. Let&rsquo;s see what the storage looks like:</p>
+
+<figure class='code'><figcaption><span>How Big is the hstore Data?</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt; psql -d reviews -c <span class="s1">&#39;SELECT pg_size_pretty(pg_database_size(current_database()));&#39;</span>
+</span><span class='line'> pg_size_pretty
+</span><span class='line'>----------------
+</span><span class='line'> 277 MB
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The original, uncompressed data is 208 MB on disk, so roughly a third bigger
+given the overhead of the database. Just for fun, let&rsquo;s compare it to JSON:</p>
+
+<figure class='code'><figcaption><span>Load Amazon Reviews as JSON</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&gt; createdb reviews_js
+</span><span class='line'>&gt; psql -d reviews_js -c <span class="s1">&#39;CREATE TABLE reviews(review json);&#39;</span>
+</span><span class='line'>CREATE TABLE
+</span><span class='line'>&gt; gzcat customer_reviews_nested_1998.json.gz | sed -e <span class="s1">&#39;s/\\/\\\\/g&#39;</span> <span class="se">\</span>
+</span><span class='line'> | sed -e <span class="s2">&quot;s/&#39;/&#39;&#39;/g&quot;</span> | &gt; /tmp/json.copy
+</span><span class='line'>&gt; <span class="nb">time </span>psql -d reviews_js -c <span class="s2">&quot;COPY reviews FROM &#39;/tmp/json.copy&#39;&quot;</span>
+</span><span class='line'>COPY 589859
+</span><span class='line'>       0.00s user 0.00s system 0% cpu 7.434 total
+</span><span class='line'>&gt; psql -d reviews_js -c <span class="s1">&#39;SELECT pg_size_pretty(pg_database_size(current_database()));&#39;</span>
+</span><span class='line'> pg_size_pretty
+</span><span class='line'>----------------
+</span><span class='line'> 239 MB
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Almost 80K records per second, faster, I&rsquo;m guessing, because the JSON type
+doesn&rsquo;t convert the data to binary representation its way in. JSON currently
+uses less overhead for storage, aw well; I wonder if that&rsquo;s the benefit of
+<a href="http://www.postgresql.org/docs/current/static/storage-toast.html">TOAST storage</a>?</p>
+
+<p>Let&rsquo;s try querying these guys. I adapted the query from the CitusDB <a href="http://citusdata.com/blog/65-run-sql-on-json-files-without-any-data-loads">blog
+post</a> and ran it on my 2013 MacBook Air (1.7 GHz Intel Core i7) with iTunes
+and a bunch of other apps running in the background [yeah, I&rsquo;m lazy]). Check
+out those operators, by the way! Given a path, <code>#^&gt;</code> returns a numeric value:</p>
+
+<figure class='code'><figcaption><span>Query the hstore-encoded reviews</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">reviews</span><span class="o">=#</span> <span class="k">SELECT</span>
+</span><span class='line'>    <span class="n">width_bucket</span><span class="p">(</span><span class="k">length</span><span class="p">(</span><span class="n">review</span> <span class="o">#&gt;</span> <span class="s1">&#39;{product,title}&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="n">title_length_bucket</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">round</span><span class="p">(</span><span class="k">avg</span><span class="p">(</span><span class="n">review</span> <span class="o">#^&gt;</span> <span class="s1">&#39;{review,rating}&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">review_average</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'><span class="k">FROM</span>
+</span><span class='line'>    <span class="n">reviews</span>
+</span><span class='line'><span class="k">WHERE</span>
+</span><span class='line'>    <span class="n">review</span> <span class="o">#&gt;</span> <span class="s1">&#39;{product,group}&#39;</span> <span class="o">=</span> <span class="s1">&#39;Book&#39;</span>
+</span><span class='line'><span class="k">GROUP</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span>
+</span><span class='line'><span class="k">ORDER</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span><span class="p">;</span>
+</span><span class='line'> <span class="n">title_length_bucket</span> <span class="o">|</span> <span class="n">review_average</span> <span class="o">|</span> <span class="k">count</span>
+</span><span class='line'><span class="c1">---------------------+----------------+--------</span>
+</span><span class='line'>                   <span class="mi">1</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">42</span> <span class="o">|</span>  <span class="mi">56299</span>
+</span><span class='line'>                   <span class="mi">2</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">33</span> <span class="o">|</span> <span class="mi">170774</span>
+</span><span class='line'>                   <span class="mi">3</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">45</span> <span class="o">|</span> <span class="mi">104778</span>
+</span><span class='line'>                   <span class="mi">4</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">41</span> <span class="o">|</span>  <span class="mi">69719</span>
+</span><span class='line'>                   <span class="mi">5</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">36</span> <span class="o">|</span>  <span class="mi">47110</span>
+</span><span class='line'>                   <span class="mi">6</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">43</span> <span class="o">|</span>  <span class="mi">43070</span>
+</span><span class='line'><span class="p">(</span><span class="mi">6</span> <span class="k">rows</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">2301</span><span class="p">.</span><span class="mi">620</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The benefit of the native type is pretty apparent here. I ran this query
+several times, and the time was always between 2.3 and 2.4 seconds. The Citus
+<a href="https://github.com/citusdata/json_fdw">json_fdw</a> query took &ldquo;about 6 seconds on a 3.1 GHz CPU core.&rdquo; Let&rsquo;s see how
+well the JSON type does (pity there is no operator to fetch a value as
+numeric; we have to cast from text):</p>
+
+<figure class='code'><figcaption><span>Query the JSON-encoded reviews</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">reviews_js</span><span class="o">=#</span> <span class="k">SELECT</span>
+</span><span class='line'>    <span class="n">width_bucket</span><span class="p">(</span><span class="k">length</span><span class="p">(</span><span class="n">review</span> <span class="o">#&gt;&gt;</span> <span class="s1">&#39;{product,title}&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="n">title_length_bucket</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">round</span><span class="p">(</span><span class="k">avg</span><span class="p">((</span><span class="n">review</span> <span class="o">#&gt;&gt;</span> <span class="s1">&#39;{review,rating}&#39;</span><span class="p">)::</span><span class="nb">numeric</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">review_average</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'><span class="k">FROM</span>
+</span><span class='line'>    <span class="n">reviews</span>
+</span><span class='line'><span class="k">WHERE</span>
+</span><span class='line'>    <span class="n">review</span> <span class="o">#&gt;&gt;</span> <span class="s1">&#39;{product,group}&#39;</span> <span class="o">=</span> <span class="s1">&#39;Book&#39;</span>
+</span><span class='line'><span class="k">GROUP</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span>
+</span><span class='line'><span class="k">ORDER</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span><span class="p">;</span>
+</span><span class='line'> <span class="n">title_length_bucket</span> <span class="o">|</span> <span class="n">review_average</span> <span class="o">|</span> <span class="k">count</span>
+</span><span class='line'><span class="c1">---------------------+----------------+--------</span>
+</span><span class='line'>                   <span class="mi">1</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">42</span> <span class="o">|</span>  <span class="mi">56299</span>
+</span><span class='line'>                   <span class="mi">2</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">33</span> <span class="o">|</span> <span class="mi">170774</span>
+</span><span class='line'>                   <span class="mi">3</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">45</span> <span class="o">|</span> <span class="mi">104778</span>
+</span><span class='line'>                   <span class="mi">4</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">41</span> <span class="o">|</span>  <span class="mi">69719</span>
+</span><span class='line'>                   <span class="mi">5</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">36</span> <span class="o">|</span>  <span class="mi">47110</span>
+</span><span class='line'>                   <span class="mi">6</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">43</span> <span class="o">|</span>  <span class="mi">43070</span>
+</span><span class='line'><span class="p">(</span><span class="mi">6</span> <span class="k">rows</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">5530</span><span class="p">.</span><span class="mi">120</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A little faster than the <a href="https://github.com/citusdata/json_fdw">json_fdw</a> version, but comparable. But takes well
+over twice as long as the hstore version, though. For queries, hstore is the
+clear winner. Yes, you pay up-front for loading and storage, but the payoff at
+query time is substantial. Ideally, of course, we would have the insert and
+storage benefits of JSON <em>and</em> the query performance of hstore. There was talk
+last spring at PGCon of using the same representation for JSON and hstore;
+perhaps that can still come about.</p>
+
+<p>Meanwhile, I expect to play with some other data sets over the next week;
+watch this spot for more!</p>
+]]></content>
+    </entry>
   
     <entry>
       

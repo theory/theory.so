@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>theory.so</title>
+  <title>Testing Nested hstore - theory.so</title>
   <meta name="author" content="David E. Wheeler">
 
   
@@ -19,7 +19,7 @@ forthcoming nested hstore patch for PostgreSQL. It adds support &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://theory.so">
+  <link rel="canonical" href="http://theory.so/pg/2013/10/23/testing-nested-hstore">
   <link href="/favicon.ico" rel="icon">
   
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -71,25 +71,23 @@ forthcoming nested hstore patch for PostgreSQL. It adds support &hellip;">
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+
+
+
+
+
+
+
+
+
+
+<article class="hentry" role="article" >
   
-    
-    
-
-
-
-
-
-
-
-
-
-    <article >
-      
   <header>
     <h1 class="entry-title">
 
-<a href="/pg/2013/10/23/testing-nested-hstore/">Testing Nested hstore</a>
+Testing Nested hstore
 
 </h1>
 
@@ -326,451 +324,81 @@ watch this spot for more!</p>
 </div>
 
 
-    </article>
-  
-    
-    
-
-
-
-  
-
-
-
-
-
-
-
-    <article data-linklog>
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="http://www.openscg.com/2013/09/the-power-of-enums/">The Power of Enums</a>
-<span class='linklog-marker'>→</span>
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-29T14:50:00-07:00" pubdate data-updated="true">29 September 2013</time>
-        
-         &bull; <a rel="bookmark" href="/pg/2013/09/29/the-power-of-enums/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Jim Mlodgenski on using <a href="http://www.postgresql.org/docs/9.3/static/datatype-enum.html">Enums</a> in place of references to small lookup tables:</p>
-
-<blockquote><p>I saw something else I didn’t expect: […] There was a 8% increase
-in performance. I was expecting the test with the enums to be close
-to the baseline, but I wasn’t expecting it to be faster. Thinking
-about it, it makes sense. Enums values are just numbers so we’re
-effectively using surrogate keys under the covers, but the users would
-still the the enum labels when they are looking at the data. It ended
-up being a no brainer to use enums for these static tables. There was
-a increase in performance while still maintaining the integrity of the
-data.</p></blockquote>
-
-<p>I&rsquo;ve been a big fan of Enums since Andrew and Tom Dunstan released a patch for
-them during the PostgreSQL 8.2 era. Today they&rsquo;re a core feature, and as of
-9.1, you can even modify their values! You&rsquo;re missing out if you&rsquo;re not using
-them yet.</p>
-</div>
-
-
-    </article>
-  
-    
-    
-
-
-
-  
-
-
-
-
-
-
-
-    <article data-linklog>
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="http://blog.cloudera.com/blog/2013/09/whats-next-for-impala-after-release-1-1/">Whither Impala Fault Tolerance?</a>
-<span class='linklog-marker'>→</span>
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-29T14:29:00-07:00" pubdate data-updated="true">29 September 2013</time>
-        
-         &bull; <a rel="bookmark" href="/impala/2013/09/29/whither-impala-fault-tolerance/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Justin Erickson on the <a href="http://blog.cloudera.com/">Cloudera Blog</a></p>
-
-<blockquote><p>In December 2012, while Cloudera Impala was still in its beta phase, we
-<a href="http://blog.cloudera.com/blog/2012/12/whats-next-for-cloudera-impala/">provided a roadmap</a>
-for planned functionality in the production release. In the same spirit of
-keeping Impala users, customers, and enthusiasts well informed, this post
-provides an updated roadmap for upcoming releases later this year and in early
-2014.</p></blockquote>
-
-<p><a href="http://www.cloudera.com/content/cloudera/en/products/cdh/impala.html">Impala</a> is a pretty nice-looking SQLish query engine that runs on Hadoop. It
-provides the same basic interface as <a href="http://hive.apache.org/">Hive</a>, but circumvents MapReduce to
-access data directly from data nodes in parallel. But, in my opinion, to be
-useful as a real-time query engine, it needs fault tolerance. From the
-<a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/Impala/latest/Cloudera-Impala-Frequently-Asked-Questions/Cloudera-Impala-Frequently-Asked-Questions.html">Impala FAQ</a>, under the list of unsupported features:</p>
-
-<blockquote><p>Fault tolerance for running queries (not currently). In the current release,
-Impala aborts the query if any host on which the query is executing fails. In
-the future, we will consider adding fault tolerance to Impala, so that a
-running query would complete even in the presence of host failures.</p></blockquote>
-
-<p>Sounds like an unfortunate issue. Since it&rsquo;s pretty typical for data nodes to
-go down, this seems like an essential feature. Products like <a href="http://citusdata.com/docs/sql-on-hadoop" title="CitusDB SQL on Hadoop">CitusDB</a> offer
-fault tolerance:</p>
-
-<blockquote><p><strong>Does CitusDB recover from failures?</strong></p>
-
-<p>Yes. The CitusDB master node intelligently re-routes the work on any failed
-nodes to the remaining nodes in real-time. Since the underlying data are kept
-in fixed-size blocks in HDFS, a failed node&rsquo;s work can evenly be distributed
-among the remaining nodes in the cluster.</p></blockquote>
-
-<p>That sound exactly right. I&rsquo;m excited about Citus, and if it adds solid
-support for more data formats, such as <a href="http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.0.0.2/ds_Hive/orcfile.html" title="ORC File Format">ORC</a> and <a href="http://parquet.io/" title="Parquet is a columnar storage format for Hadoop.">Parquet</a>, it may well be the
-way to go. But Impala will be a nice alternative if it can get fault tolerance
-figured out. I&rsquo;m disappointed it&rsquo;s not on the road map.</p>
-</div>
-
-
-    </article>
-  
-    
-    
-
-
-
-
-
-
-
-
-
-    <article >
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="/sqitch/2013/09/06/sqitch-templating/">Sqitch Templating</a>
-
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-06T13:44:00-07:00" pubdate data-updated="true"> 6 September 2013</time>
-        
-         &bull; <a rel="bookmark" href="/sqitch/2013/09/06/sqitch-templating/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Last week saw the v.980 release of <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, a database change management
-system. The headline feature in this version is support for <a href="http://dev.mysql.com/" title="The world's most popular open source database">MySQL</a> 5.6.4 or
-higher. Why 5.6.4 rather than 5.1 or even 5.5? Mainly because 5.6.4 finally
-added support for fractional seconds in <code>DATETIME</code> columns (details in the
-<a href="https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-4.html" title="Changes in MySQL 5.6.4 (2011-12-20, Milestone 7)">release notes</a>). This feature is essential for Sqitch, because changes often
-execute within a second of each other, and the deploy time is included in the
-log table&rsquo;s primary key.</p>
-
-<p>With the requirement for fractional seconds satisfied by 5.6.4, there was
-nothing to prevent usage of <a href="http://dev.mysql.com/doc/refman/5.5/en/condition-handling.html" title="MySQL 5.5 Reference Manual: Condition Handling"><code>SIGNAL</code></a>, added in 5.5, to
-<a href="http://stackoverflow.com/a/17424570/79202" title="How do I get MySQL to throw a conditional runtime exception in SQL">mimic check constraints</a> in a trigger. This brings the Sqitch MySQL
-implementation into line with what was already possible in the Postgres,
-SQLite, and Oracle support. Check out the <a href="https://metacpan.org/module/sqitchtutorial-mysql" title="A tutorial introduction to Sqitch change management on MySQL">tutorial</a> and the accompanying
-<a href="https://github.com/theory/sqitch-mysql-intro" title="Sqitch MySQL Intro Sample Repository">Git repository</a> to get started managing your MySQL databases with Sqitch.</p>
-
-<p>The MySQL support might be the headliner, but the change in v0.980 I&rsquo;m most
-excited about is improved template support. Sqitch executes templates to
-create the default deploy, revert, and verify scripts, but up to now they have
-not been easy to customize. With v0.980, you can create as many custom
-templates as you like, and use them as appropriate.</p>
-
-</div>
   <footer>
-    <a rel="full-article" href="/sqitch/2013/09/06/sqitch-templating/">CONTINUE →</a>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://theory.so/pg/2013/10/23/testing-nested-hstore/" data-via="theory" data-counturl="http://theory.so/pg/2013/10/23/testing-nested-hstore/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="false" data-layout="button_count" data-width="200" data-show-faces="false"></div>
+  
+  
+  <span class="adn-post"><a href="https://alpha.app.net/intent/post/?url=/pg/2013/10/23/testing-nested-hstore/&text=theory.so: “Testing Nested hstore”" class="adn-button" target="_blank" data-type="share" data-width="132" data-height="20" data-text="theory.so: “Testing Nested hstore”" data-url="/pg/2013/10/23/testing-nested-hstore/" >Share on App.net</a></span>
+  <script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//d2zh9g63fcvyrq.cloudfront.net/adn.js";fjs.parentNode.insertBefore(js,fjs);}}(document, "script", "adn-button-js"));</script>
+  
+</div>
+
+    
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn"><a href="/about" title="About the author (David E. Wheeler)" rel="author">David E. Wheeler</a></span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-23T10:26:00-07:00" pubdate data-updated="true">23 October 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/categories/pg/'>pg</a>
+  
+</span>
+
+
+    </p>
+          <div class="follow_buttons_byline">
+
+  <a href="http://twitter.com/theory" class="twitter-follow-button" data-show-count="true">Follow @theory</a>
+
+
+   <a href="https://alpha.app.net/intent/follow/?user_id=%40theory" class="adn-button" target="_blank" data-type="follow" data-width="277" data-height="20" data-user-id="@theory" data-show-count="1" data-show-username="1">Follow me on App.net</a>
+<script src="//d2zh9g63fcvyrq.cloudfront.net/adn.js"></script>
+
+      </div>
+
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/pg/2013/09/29/the-power-of-enums/" title="Previous Post: The Power of Enums">&laquo; The Power of Enums</a>
+      
+      
+    </p>
   </footer>
+</article>
 
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
 
-    </article>
-  
-    
-    
-
-
-
-  
-
-
-
-
-
-
-
-    <article data-linklog>
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="http://tapoueh.org/blog/2013/08/20-Window-Functions">Understanding Window Functions</a>
-<span class='linklog-marker'>→</span>
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-28T17:25:00-07:00" pubdate data-updated="true">28 August 2013</time>
-        
-         &bull; <a rel="bookmark" href="/pg/windows/2013/08/28/understanding-window-functions/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Dimitri Fontaine:</p>
-
-<blockquote><p>There was SQL before
-<a href="http://www.postgresql.org/docs/current/static/tutorial-window.html">window functions</a>
-and SQL after <em>window functions:</em> that&rsquo;s how powerful this tool is. Being
-that of a deal breaker unfortunately means that it can be quite hard to
-grasp the feature. This article aims at making it crystal clear so that you
-can begin using it today and are able to reason about it and recognize cases
-where you want to be using <em>window functions.</em></p></blockquote>
-
-<p>Great intro to a powerful feature.</p>
 </div>
 
-
-    </article>
-  
-    
-    
-
-
-
-
-
-
-
-
-
-    <article >
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="/sqitch/data/2013/08/28/data-deployment-with-sqitch/">Data Deployment with Sqitch</a>
-
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-28T17:09:00-07:00" pubdate data-updated="true">28 August 2013</time>
-        
-         &bull; <a rel="bookmark" href="/sqitch/data/2013/08/28/data-deployment-with-sqitch/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>I&rsquo;ve been thinking about data migrations. I love how well <a href="http://sqitch.org/">Sqitch</a> works for
-<em>schema</em> changes, but so far have avoided <em>data</em> changes. Some data ought to
-be managed by the deployment process, rather than by end-user applications.
-Lists of countries, for example. Yet none of <a href="http://iovation.com/">our</a> Sqitch-managed databases
-include <code>INSERT</code>s, <code>UPDATE</code>s, or <code>DELETE</code>s in deploy scripts. Why not? Two
-reasons:</p>
-
-<ol>
-<li><p>These are mainly Postgres ports of existing Oracle databases. As such, I&rsquo;ve
-written independent migration scripts that use <a href="http://pgxn.org/extension/oracle_fdw"><code>oracle_fdw</code></a> to copy data
-from Oracle. It made no sense to commit hard-coded changes to the deploy
-script, even for static data, as it was all to be copied from the old
-production Oracle databases &mdash; often months after I wrote the migrations.</p></li>
-<li><p>These projects include extensive <a href="http://pgtap.org/">pgTAP</a> unit tests that expect to run many
-times against an empty database with no side effects. Having different data
-in testing than in production increases the likelihood of unforeseen
-behavioral variations. Better to expect <em>no</em> data in tests, freeing them to
-focus on units of behavior without regard to preexisting data.</p></li>
-</ol>
-
-
-<p>Now that we have multiple Sqitch-deployed databases in production, the time
-has come to address these issues.</p>
-
-<h2>Deploy Hooks for External Sources</h2>
-
-<p>I propose to resolve the one-time migration requirement with <a href="https://github.com/theory/sqitch/issues/96">deploy hooks</a>.
-The idea is similar to <a href="http://git-scm.com/docs/githooks">Git hooks</a>: Before or after any <code>sqitch deploy</code>, one
-or more hook scripts can run. The impetus was to ensure some higher level of
-consistency after every <code>deploy</code>. For example, a post-deploy hook might grant
-privileges on all tables in a database. Another might run <code>VACCUM; ANALZYE;</code>.</p>
-
-<p>But we could also use it for one-time data migrations. An option to <code>deploy</code>
-will disable them, which would be useful for development and test databases.
-Once the migration has been run in production, we just delete the migration
-hook scripts from the project. Sqitch won&rsquo;t record hook executions, so adding
-or removing them will be no problem.</p>
-
-<p>I like this approach, as Sqitch will automatically run migration scripts, but
-hooks will not change the interface of Sqitch itself. And it&rsquo;s more generally
-useful. Hell, I might want deploy hook script that sends an email notification
-announcing a deployment (though that might require adding support for
-<a href="https://github.com/theory/sqitch/issues/1">non-SQL scripts</a>). There are all kinds of things for which hooks will prove
-useful.</p>
-
-<h2>Changes for Static Data Maintenance</h2>
-
-<p>For data that must be tied to the deployment process, there are two
-complications that have prevetned me from simply managing them in normal
-Sqitch changes:</p>
-
-<ol>
-<li><p>There might be side-effects to the deployment. For example, a foreign key
-constraint to the <code>users</code> table, to identify the users who added rows to
-the database. But in a new database, perhaps there are no users &mdash; and
-Sqitch doesn&rsquo;t create them, the app does. Chicken, meet egg.</p></li>
-<li><p>The initial data set might derived from some external source, such as
-another database. Consequently, none of that data was defined in Sqitch
-deploy scripts. This situation complicates future updates of the data. We
-can add data via Sqitch in the future, but then we don&rsquo;t have the canonical
-list of all rows that should exist in all such databases.</p></li>
-</ol>
-
-
-<p>However, I can think of no alternative that does not over-complicate Sqitch
-itself. I considered adding another change-related script type, named
-&ldquo;update&rdquo;, to complement the existing deploy, verify, and revert scripts. But
-oftentimes a data change would not be tied to a schema change, so the
-corresponding deploy script would be a no-op. Seems silly.</p>
-
-<p>I also considered adding a completely separate command specifically for
-deploying data changes. Yet these data migrations are exactly like schema
-changes: Sqitch must execute them in the proper order relative to other
-changes, record successful or failed deployment, and be able to revert them
-when required. The only difference is what&rsquo;s defined in them: data
-modification rather than definition.</p>
-
-<p>Through several drafts of this post, I have come around to the idea that I
-should change nothing in Sqitch with regard to data deployments. A better
-solution than the above, I believe, is organizational.</p>
-
-<h3>Data Deploy Best Practice</h3>
-
-<p>Let the best practice for data deploys be this: they should be contained in
-Sqitch changes, but such changes should contain <em>only</em> data modifications. No
-change script should both define a table and insert its initial rows. Keep the
-table and its data in separate changes &mdash; keep DML separate from DDL.</p>
-
-<p>For our list of countries, we might have a change named &ldquo;countries&rdquo;, which
-creates the <code>countries</code> table, and another, named &ldquo;country_data&rdquo;, which
-inserts the appropriate data into that table. Where necessary and appropriate,
-these changes may use conditional paths to bring the data up-to-date and in
-sync across deployments.</p>
-
-<p>Conditions must deal with side-effects, such as foreign key constraints. Where
-possible, such side effects ought be removed from deployment-managed data. For
-tracking the user or users who added data to a database, for example, one can
-use the tools of the source code repository (<code>git log</code>, <code>git blame</code>) to assign
-blame. Other side-effects may be more necessary, but to the extent possible,
-deployed data should be independent.</p>
-
-<p>Naturally, unit tests must expect static data to be present, and be updated
-when that data changes. We are, after all, talking about infrequently-updated
-data. Frequently-updated data should have separate interfaces provided by
-applications to change the data. Otherwise, how static is it, really?</p>
-</div>
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/archives">Blog Archives</a>
-    
-  </div>
-</div>
 
     </div>
   </div>
@@ -787,7 +415,10 @@ applications to change the data. Otherwise, how static is it, really?</p>
       var disqus_shortname = 'theoryso';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://theory.so/pg/2013/10/23/testing-nested-hstore/';
+        var disqus_url = 'http://theory.so/pg/2013/10/23/testing-nested-hstore/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
