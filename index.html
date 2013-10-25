@@ -9,8 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="I&rsquo;ve been helping Oleg Bartunov and Teodor Sigaev with documentation for the
-forthcoming nested hstore patch for PostgreSQL. It adds support &hellip;">
+  <meta name="description" content="In my first Nested hstore post yesterday, I ran a query against unindexed
+hstore data, which required a table scan. But hstore is able to take &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +72,206 @@ forthcoming nested hstore patch for PostgreSQL. It adds support &hellip;">
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+
+
+
+
+
+
+    <article >
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="/pg/2013/10/25/indexing-nested-hstore/">Indexing Nested hstore</a>
+
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-25T14:36:00-07:00" pubdate data-updated="true">25 October 2013</time>
+        
+         &bull; <a rel="bookmark" href="/pg/2013/10/25/indexing-nested-hstore/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>In my first <a href="/pg/2013/10/23/testing-nested-hstore/">Nested hstore</a> post yesterday, I ran a query against unindexed
+hstore data, which required a table scan. But hstore is able to take
+advantage of <a href="http://www.postgresql.org/docs/current/static/gin.html">GIN indexes</a>. So let&rsquo;s see what that looks like. Connecting to
+the same database, I indexed the <code>review</code> column:</p>
+
+<figure class='code'><figcaption><span>Indexing reviews</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">reviews</span><span class="o">=#</span> <span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_reviews_gin</span> <span class="k">ON</span> <span class="n">reviews</span> <span class="k">USING</span> <span class="n">GIN</span><span class="p">(</span><span class="n">review</span><span class="p">);</span>
+</span><span class='line'><span class="k">CREATE</span> <span class="k">INDEX</span>
+</span><span class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">360448</span><span class="p">.</span><span class="mi">426</span> <span class="n">ms</span>
+</span><span class='line'><span class="n">reviews</span><span class="o">=#</span> <span class="k">SELECT</span> <span class="n">pg_size_pretty</span><span class="p">(</span><span class="n">pg_database_size</span><span class="p">(</span><span class="n">current_database</span><span class="p">()));</span>
+</span><span class='line'> <span class="n">pg_size_pretty</span>
+</span><span class='line'><span class="c1">----------------</span>
+</span><span class='line'> <span class="mi">421</span> <span class="n">MB</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, that takes a while, and makes the database a lot bigger (it was 277 MB
+unindexed). But is it worth it? Let&rsquo;s find out. Oleg and Teodor&rsquo;s patch adds
+support for a nested hstore value on the right-hand-side of the <code>@&gt;</code>
+operator. In practice, that means we can specify the full path to a nested
+value as an hstore expression. In our case, to query only for Books, instead
+of using this expression:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">WHERE</span> <span class="n">review</span> <span class="o">#&gt;</span> <span class="s1">&#39;{product,group}&#39;</span> <span class="o">=</span> <span class="s1">&#39;Book&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can use an hstore value with the entire path, including the value:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">WHERE</span> <span class="n">review</span> <span class="o">@&gt;</span> <span class="s1">&#39;{product =&gt; {group =&gt; Book}}&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Awesome, right? Let&rsquo;s give it a try:</p>
+
+<figure class='code'><figcaption><span>Query Book Reviews</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">reviews</span><span class="o">=#</span> <span class="k">SELECT</span>
+</span><span class='line'>    <span class="n">width_bucket</span><span class="p">(</span><span class="k">length</span><span class="p">(</span><span class="n">review</span> <span class="o">#&gt;</span> <span class="s1">&#39;{product,title}&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="n">title_length_bucket</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">round</span><span class="p">(</span><span class="k">avg</span><span class="p">(</span><span class="n">review</span> <span class="o">#^&gt;</span> <span class="s1">&#39;{review,rating}&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">review_average</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'><span class="k">FROM</span>
+</span><span class='line'>    <span class="n">reviews</span>
+</span><span class='line'><span class="k">WHERE</span>
+</span><span class='line'>    <span class="n">review</span> <span class="o">@&gt;</span> <span class="s1">&#39;{product =&gt; {group =&gt; Book}}&#39;</span>
+</span><span class='line'><span class="k">GROUP</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span>
+</span><span class='line'><span class="k">ORDER</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span><span class="p">;</span>
+</span><span class='line'> <span class="n">title_length_bucket</span> <span class="o">|</span> <span class="n">review_average</span> <span class="o">|</span> <span class="k">count</span>
+</span><span class='line'><span class="c1">---------------------+----------------+--------</span>
+</span><span class='line'>                   <span class="mi">1</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">42</span> <span class="o">|</span>  <span class="mi">56299</span>
+</span><span class='line'>                   <span class="mi">2</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">33</span> <span class="o">|</span> <span class="mi">170774</span>
+</span><span class='line'>                   <span class="mi">3</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">45</span> <span class="o">|</span> <span class="mi">104778</span>
+</span><span class='line'>                   <span class="mi">4</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">41</span> <span class="o">|</span>  <span class="mi">69719</span>
+</span><span class='line'>                   <span class="mi">5</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">36</span> <span class="o">|</span>  <span class="mi">47110</span>
+</span><span class='line'>                   <span class="mi">6</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">43</span> <span class="o">|</span>  <span class="mi">43070</span>
+</span><span class='line'><span class="p">(</span><span class="mi">6</span> <span class="k">rows</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">849</span><span class="p">.</span><span class="mi">681</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That time looks better than yesterday&rsquo;s, but in truth I first ran this query
+just before building the GIN index and got about the same result. Must be
+that Mavericks is finished indexing my disk or something. At any rate, the
+index is not buying us much here.</p>
+
+<p>But hey, we&rsquo;re dealing with 1998 Amazon reviews, so querying against books
+probably isn&rsquo;t very selective. I don&rsquo;t blame the planner for deciding that a
+table scan is cheaper than an index scan. But what if we try a more selective
+value, say &ldquo;DVD&rdquo;?</p>
+
+<figure class='code'><figcaption><span>Query DVD Reivews</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="n">reviews</span><span class="o">=#</span> <span class="k">SELECT</span>
+</span><span class='line'>    <span class="n">width_bucket</span><span class="p">(</span><span class="k">length</span><span class="p">(</span><span class="n">review</span> <span class="o">#&gt;</span> <span class="s1">&#39;{product,title}&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="n">title_length_bucket</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">round</span><span class="p">(</span><span class="k">avg</span><span class="p">(</span><span class="n">review</span> <span class="o">#^&gt;</span> <span class="s1">&#39;{review,rating}&#39;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span> <span class="k">AS</span> <span class="n">review_average</span><span class="p">,</span>
+</span><span class='line'>    <span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'><span class="k">FROM</span>
+</span><span class='line'>    <span class="n">reviews</span>
+</span><span class='line'><span class="k">WHERE</span>
+</span><span class='line'>    <span class="n">review</span> <span class="o">@&gt;</span> <span class="s1">&#39;{product =&gt; {group =&gt; DVD}}&#39;</span>
+</span><span class='line'><span class="k">GROUP</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span>
+</span><span class='line'><span class="k">ORDER</span> <span class="k">BY</span>
+</span><span class='line'>    <span class="n">title_length_bucket</span><span class="p">;</span>
+</span><span class='line'> <span class="n">title_length_bucket</span> <span class="o">|</span> <span class="n">review_average</span> <span class="o">|</span> <span class="k">count</span>
+</span><span class='line'><span class="c1">---------------------+----------------+-------</span>
+</span><span class='line'>                   <span class="mi">1</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">27</span> <span class="o">|</span>  <span class="mi">2646</span>
+</span><span class='line'>                   <span class="mi">2</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">44</span> <span class="o">|</span>  <span class="mi">4180</span>
+</span><span class='line'>                   <span class="mi">3</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">53</span> <span class="o">|</span>  <span class="mi">1996</span>
+</span><span class='line'>                   <span class="mi">4</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">38</span> <span class="o">|</span>  <span class="mi">2294</span>
+</span><span class='line'>                   <span class="mi">5</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">48</span> <span class="o">|</span>   <span class="mi">943</span>
+</span><span class='line'>                   <span class="mi">6</span> <span class="o">|</span>           <span class="mi">4</span><span class="p">.</span><span class="mi">42</span> <span class="o">|</span>   <span class="mi">738</span>
+</span><span class='line'><span class="p">(</span><span class="mi">6</span> <span class="k">rows</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Time</span><span class="p">:</span> <span class="mi">73</span><span class="p">.</span><span class="mi">913</span> <span class="n">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Wow! Under 100ms. That&rsquo;s more like it! <a href="http://en.wikipedia.org/wiki/Inverted_index">Inverted indexing</a> FTW!</p>
+</div>
+
+
+    </article>
   
     
     

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: pg | theory.so]]></title>
   <link href="http://theory.so/categories/pg/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-10-23T14:27:17-07:00</updated>
+  <updated>2013-10-25T15:10:23-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,118 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[Indexing Nested hstore]]></title>
+<link href="http://theory.so/pg/2013/10/25/indexing-nested-hstore/"/>
+<updated>2013-10-25T14:36:00-07:00</updated>
+<id>http://theory.so/pg/2013/10/25/indexing-nested-hstore</id>
+
+      <content type="html"><![CDATA[<p>In my first <a href="/pg/2013/10/23/testing-nested-hstore/">Nested hstore</a> post yesterday, I ran a query against unindexed
+hstore data, which required a table scan. But hstore is able to take
+advantage of <a href="http://www.postgresql.org/docs/current/static/gin.html">GIN indexes</a>. So let&rsquo;s see what that looks like. Connecting to
+the same database, I indexed the <code>review</code> column:</p>
+
+<p>``` sql Indexing reviews
+reviews=# CREATE INDEX idx_reviews_gin ON reviews USING GIN(review);
+CREATE INDEX
+Time: 360448.426 ms
+reviews=# SELECT pg_size_pretty(pg_database_size(current_database()));</p>
+
+<h2> pg_size_pretty </h2>
+
+<p> 421 MB
+```</p>
+
+<p>Well, that takes a while, and makes the database a lot bigger (it was 277 MB
+unindexed). But is it worth it? Let&rsquo;s find out. Oleg and Teodor&rsquo;s patch adds
+support for a nested hstore value on the right-hand-side of the <code>@&gt;</code>
+operator. In practice, that means we can specify the full path to a nested
+value as an hstore expression. In our case, to query only for Books, instead
+of using this expression:</p>
+
+<p><code>sql
+WHERE review #&gt; '{product,group}' = 'Book'
+</code></p>
+
+<p>We can use an hstore value with the entire path, including the value:</p>
+
+<p><code>sql
+WHERE review @&gt; '{product =&gt; {group =&gt; Book}}'
+</code></p>
+
+<p>Awesome, right? Let&rsquo;s give it a try:</p>
+
+<p>``` sql Query Book Reviews
+reviews=# SELECT
+    width_bucket(length(review #> &lsquo;{product,title}&rsquo;), 1, 50, 5) title_length_bucket,
+    round(avg(review #^> &lsquo;{review,rating}&rsquo;), 2) AS review_average,
+    count(*)
+FROM
+    reviews
+WHERE
+    review @> &lsquo;{product => {group => Book}}&rsquo;
+GROUP BY
+    title_length_bucket
+ORDER BY
+    title_length_bucket;
+ title_length_bucket | review_average | count<br/>
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;&mdash;&mdash;-+&mdash;&mdash;&ndash;
+                   1 |           4.42 |  56299
+                   2 |           4.33 | 170774
+                   3 |           4.45 | 104778
+                   4 |           4.41 |  69719
+                   5 |           4.36 |  47110
+                   6 |           4.43 |  43070
+(6 rows)</p>
+
+<p>Time: 849.681 ms
+```</p>
+
+<p>That time looks better than yesterday&rsquo;s, but in truth I first ran this query
+just before building the GIN index and got about the same result. Must be
+that Mavericks is finished indexing my disk or something. At any rate, the
+index is not buying us much here.</p>
+
+<p>But hey, we&rsquo;re dealing with 1998 Amazon reviews, so querying against books
+probably isn&rsquo;t very selective. I don&rsquo;t blame the planner for deciding that a
+table scan is cheaper than an index scan. But what if we try a more selective
+value, say &ldquo;DVD&rdquo;?</p>
+
+<p>``` sql Query DVD Reivews
+reviews=# SELECT
+    width_bucket(length(review #> &lsquo;{product,title}&rsquo;), 1, 50, 5) title_length_bucket,
+    round(avg(review #^> &lsquo;{review,rating}&rsquo;), 2) AS review_average,
+    count(*)
+FROM
+    reviews
+WHERE
+    review @> &lsquo;{product => {group => DVD}}&rsquo;
+GROUP BY
+    title_length_bucket
+ORDER BY
+    title_length_bucket;
+ title_length_bucket | review_average | count
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+&mdash;&mdash;&mdash;&mdash;&mdash;-+&mdash;&mdash;-
+                   1 |           4.27 |  2646
+                   2 |           4.44 |  4180
+                   3 |           4.53 |  1996
+                   4 |           4.38 |  2294
+                   5 |           4.48 |   943
+                   6 |           4.42 |   738
+(6 rows)</p>
+
+<p>Time: 73.913 ms
+```</p>
+
+<p>Wow! Under 100ms. That&rsquo;s more like it! <a href="http://en.wikipedia.org/wiki/Inverted_index">Inverted indexing</a> FTW!</p>
+]]></content>
+    </entry>
   
     <entry>
       
