@@ -15,11 +15,11 @@ no `.db` domain, so you do what you can, am I right?
 I've been hacking databases since 1997, when I started messing around with
 [FileMaker Pro](https://en.wikipedia.org/wiki/FileMaker) and
 [Microsoft Access](https://en.wikipedia.org/wiki/Microsoft_Access). Since
-2001, I've focused primarily on [PostgreSQL], for which I have developed
-[PGXN](http://pgxn.org/), a service for distributing extensions, and
-[pgTAP](http://pgtap.org/), a unit testing framework. More recently, I've been
-working on [Sqitch](http://sqitch.org/), a database schema change management
-app for PostgreSQL, Oracle, SQLite, and MySQL.
+2001, I've focused primarily on [PostgreSQL](http://postgresql.org/), for
+which I have developed [PGXN](http://pgxn.org/), a service for distributing
+extensions, and [pgTAP](http://pgtap.org/), a unit testing framework. More
+recently, I've been working on [Sqitch](http://sqitch.org/), a database schema
+change management app for PostgreSQL, Oracle, SQLite, and MySQL.
 
 I'm [@theory on Twitter](https://twitter.com/theory/) and also
 [@theory on App.Net](https://alpha.app.net/theory/).
