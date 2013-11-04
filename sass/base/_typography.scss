@@ -15,7 +15,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-regular-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-regular-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-regular-webfont.svg#source_sans_proregular') format('svg');
-    font-weight: normal;
+    font-weight: 400;
     font-style: normal;
 }
 
@@ -26,7 +26,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-it-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-it-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-it-webfont.svg#source_sans_proitalic') format('svg');
-    font-weight: normal;
+    font-weight: 400;
     font-style: italic;
 }
 
@@ -37,7 +37,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-bold-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-bold-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-bold-webfont.svg#source_sans_probold') format('svg');
-    font-weight: bold;
+    font-weight: 700;
     font-style: normal;
 }
 
@@ -48,7 +48,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-boldit-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-boldit-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-boldit-webfont.svg#source_sans_probold_italic') format('svg');
-    font-weight: bold;
+    font-weight: 700;
     font-style: italic;
 }
 
@@ -59,7 +59,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-black-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-black-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-black-webfont.svg#source_sans_problack') format('svg');
-    font-weight: bolder; // black
+    font-weight: 900;
     font-style: normal;
 }
 
@@ -70,7 +70,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-blackit-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-blackit-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-blackit-webfont.svg#source_sans_problack_italic') format('svg');
-    font-weight: bolder; // black
+    font-weight: 900;
     font-style: italic;
 }
 
@@ -81,7 +81,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-light-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-light-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-light-webfont.svg#source_sans_prolight') format('svg');
-    font-weight: lighter; // light
+    font-weight: 200;
     font-style: normal;
 
 }
@@ -93,7 +93,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcesanspro-lightit-webfont.woff') format('woff'),
          url('/fonts/sourcesanspro-lightit-webfont.ttf') format('truetype'),
          url('/fonts/sourcesanspro-lightit-webfont.svg#source_sans_prolight_italic') format('svg');
-    font-weight: lighter; // light
+    font-weight: 200;
     font-style: italic;
 }
 
@@ -104,7 +104,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcecodepro-regular-webfont.woff') format('woff'),
          url('/fonts/sourcecodepro-regular-webfont.ttf') format('truetype'),
          url('/fonts/sourcecodepro-regular-webfont.svg#source_code_proregular') format('svg');
-    font-weight: normal;
+    font-weight: 400;
     font-style: normal;
 }
 
@@ -115,7 +115,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcecodepro-bold-webfont.woff') format('woff'),
          url('/fonts/sourcecodepro-bold-webfont.ttf') format('truetype'),
          url('/fonts/sourcecodepro-bold-webfont.svg#source_code_probold') format('svg');
-    font-weight: bold;
+    font-weight: 700;
     font-style: normal;
 }
 
@@ -126,7 +126,7 @@ $nav-font-family: $heading-font-family !default;
          url('/fonts/sourcecodepro-light-webfont.woff') format('woff'),
          url('/fonts/sourcecodepro-light-webfont.ttf') format('truetype'),
          url('/fonts/sourcecodepro-light-webfont.svg#source_code_prolight') format('svg');
-    font-weight: lighter; // light
+    font-weight: 200;
     font-style: normal;
 }
 
@@ -136,7 +136,6 @@ $h3:	1.3em !default;
 $h4:	1em !default;
 $h5:	0.9em !default;
 $h6:	0.8em !default;
-
 
 // Fonts
 .heading {
