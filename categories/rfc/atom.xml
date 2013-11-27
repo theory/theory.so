@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rfc | theory.so]]></title>
   <link href="http://theory.so/categories/rfc/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-11-26T23:00:34-08:00</updated>
+  <updated>2013-11-26T23:20:27-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -30,7 +30,7 @@ simplify the specification of databases to update &mdash; especially when stored
 named targets in the configuration file.</p>
 
 <p>Before implementing it, though, I started casting about for a standard
-<a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI Scheme</a> for database connections. Imagine my surprise<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> to find that
+<a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI scheme”">URI Scheme</a> for database connections. Imagine my surprise<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> to find that
 there is none! The closest thing to a standard is <a href="http://www.jguru.com/faq/view.jsp?EID=690" title="jGuru: “What is a database URL?”">JDBC URLs</a>. Formally, their
 format is simply:</p>
 
@@ -38,7 +38,7 @@ format is simply:</p>
 </code></pre>
 
 <p>Turns out that JDBC URLs are <a href="https://groups.google.com/forum/#!topic/comp.lang.java.programmer/twkIYNaDS64" title="comp.lang.java.programmer: ”JDBC URLs ...not really URLs?“">barely URLs at all</a>. I mean, fine, according to
-<a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> they start with the <code>jdbc:</code> scheme followed by whatever. According
+<a href="http://www.ietf.org/rfc/rfc3986.txt" title="Uniform Resource Identifier (URI): Generic Syntax">RFC 3986</a> they start with the <code>jdbc:</code> scheme followed by whatever. According
 to the <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/connection.html#997649" title="Getting Started with the JDBC API: “JDBC URLs”">JDBC docs</a>, what comes after the scheme is defined as follows:</p>
 
 <pre><code>jdbc:&lt;subprotocol&gt;:&lt;subname&gt;
@@ -103,7 +103,7 @@ the engine, e.g., <code>db:mysql</code>.</p>
 
 <ul>
 <li><p>The Database URI <em>scheme</em> is <code>db</code>. Consequently, database URIs always start
-with <code>db:</code>. This is the <a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI scheme</a> that defines a database URI.</p></li>
+with <code>db:</code>. This is the <a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI scheme”">URI scheme</a> that defines a database URI.</p></li>
 <li><p>Next comes the database <em>engine</em>. This part is a string naming the type of
 database engine for the database. It must always be followed by a colon, <code>:</code>.
 There is no formal list of supported engines, though certain implementations
@@ -188,9 +188,9 @@ challenges to standardization.</p>
 <p>First, the requirement that the authority part must include a host address
 prevents the specification of a URI with a username that can be used to connect
 to a Unix socket. PostgreSQL and MySQL, among others provide authenticated
-socket connections. Fortunately <a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> does not seem to require the host
-name, and, as a precedent, neither do <a href="http://en.wikipedia.org/wiki/File_URI_scheme#Examples" title="Wikipedia: “File URI Scheme: Examples”">file URIs</a>. So I&rsquo;m thinking of allowing
-something like this to connect to a PostgreSQL database</p>
+socket connections. While <a href="http://www.ietf.org/rfc/rfc3986.txt" title="Uniform Resource Identifier (URI): Generic Syntax">RFC 3986</a> requires the host name, its predecessor,
+<a href="http://www.ietf.org/rfc/rfc3986.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a>, does not. Furthermore, as a precedent, neither do <a href="http://en.wikipedia.org/wiki/File_URI_scheme#Examples" title="Wikipedia: “File URI Scheme: Examples”">file URIs</a>. So
+I&rsquo;m thinking of allowing something like this to connect to a PostgreSQL database</p>
 
 <pre><code>db:pg://postgres:secr3t@/
 </code></pre>
@@ -210,13 +210,11 @@ connection, and a name for a remote connection. <a href="https://metacpan.org/po
 such variation. So how is one to know whether the path is a file path or a
 named database? The two variants cannot be distinguished.</p>
 
-<p><a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> is quite explicit that the path part must be absolute when following
-an authority part. It does allow an &ldquo;opaque part&rdquo; instead of an absolute path,
-but in the absence of a slash, I&rsquo;m unable to figure out how to separate it from the host name.</p>
-
-<p>The only solution I have so far found is to require a second slash for absolute
-paths. Engines that use a simple name or relative path can have it just after
-the slash, while an absolute path could use a second slash:</p>
+<p><a href="http://www.ietf.org/rfc/rfc3986.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> is quite explicit that the path part must be absolute when following
+an authority part. But <a href="http://www.ietf.org/rfc/rfc3986.txt" title="Uniform Resource Identifier (URI): Generic Syntax">RFC 3986</a> forbids the double slash only when there is
+no authority part. Therefore, I think it might be best to require a second
+slash for absolute paths. Engines that use a simple name or relative path can
+have it just after the slash, while an absolute path could use a second slash:</p>
 
 <ul>
 <li>Absolute: db:firebird://localhost//tmp/test.gdb</li>
@@ -224,9 +222,6 @@ the slash, while an absolute path could use a second slash:</p>
 <li>Name: db:postgresql://localhost/template1</li>
 </ul>
 
-
-<p>Naturally, <a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a>&rsquo;s prohibition on the second slash gives me pause. I&rsquo;m not
-sure how to resolve this issue. Suggestions appreciated!</p>
 
 <h2>That&rsquo;s It</h2>
 
