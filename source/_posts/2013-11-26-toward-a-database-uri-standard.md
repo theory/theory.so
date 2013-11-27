@@ -195,7 +195,7 @@ there for updates. And your feedback would be appreciated! What other issues
 have I overlooked? What have I got wrong? Let me know!
 
 [^1]: As in not surprised at all. Though I was hoping!
-[^2]: DSNs for Perl's [DBI] aren't much better: `dbi:<driver>:<driver-specific-stuff>`.
+[^2]: DSNs for Perl's [DBI](https://metacpan.org/module/DBI "MetaCPAN: DBI") aren't much better: `dbi:<driver>:<driver-specific-stuff>`.
 
 [Sqitch]: http://sqitch.org/ "Sane database change management"
 [specifying deployment targets via URIs]: https://github.com/theory/sqitch/issues/100 "Issue #100: “Add target command to configure target databases”"
@@ -206,7 +206,6 @@ have I overlooked? What have I got wrong? Let me know!
 [RFC 3986]: http://www.ietf.org/rfc/rfc3986.txt "Uniform Resource Identifier (URI): Generic Syntax"
 [RFC 2396]: http://www.ietf.org/rfc/rfc3986.txt "Uniform Resource Identifiers (URI): Generic Syntax"
 [JDBC docs]: http://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/connection.html#997649 "Getting Started with the JDBC API: “JDBC URLs”" 
-[DBI]: https://metacpan.org/module/DBI "MetaCPAN: DBI"
 [PostgreSQL libpq URIs]: http://www.postgresql.org/docs/9.3/static/libpq-connect.html#LIBPQ-CONNSTRING "PostgreSQL Documentation: “Connection Strings”"
 [SQLAlchemy URLs]: http://docs.sqlalchemy.org/en/rel_0_9/core/engines.html#database-urls "SQLAlchemy Documentation: “Database Urls”"
 [Stackato database URLs]: http://docs.stackato.com/3.0/user/services/data-services.html#database-url "Stackato Documentation: “DATABASE_URL”"
