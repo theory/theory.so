@@ -4,7 +4,7 @@
   <title><![CDATA[theory.so]]></title>
   <link href="http://theory.so/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-11-26T23:20:27-08:00</updated>
+  <updated>2013-11-27T09:26:46-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -30,7 +30,7 @@ simplify the specification of databases to update &mdash; especially when stored
 named targets in the configuration file.</p>
 
 <p>Before implementing it, though, I started casting about for a standard
-<a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI scheme”">URI Scheme</a> for database connections. Imagine my surprise<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> to find that
+<a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI Scheme</a> for database connections. Imagine my surprise<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> to find that
 there is none! The closest thing to a standard is <a href="http://www.jguru.com/faq/view.jsp?EID=690" title="jGuru: “What is a database URL?”">JDBC URLs</a>. Formally, their
 format is simply:</p>
 
@@ -103,7 +103,7 @@ the engine, e.g., <code>db:mysql</code>.</p>
 
 <ul>
 <li><p>The Database URI <em>scheme</em> is <code>db</code>. Consequently, database URIs always start
-with <code>db:</code>. This is the <a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI scheme”">URI scheme</a> that defines a database URI.</p></li>
+with <code>db:</code>. This is the <a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI scheme</a> that defines a database URI.</p></li>
 <li><p>Next comes the database <em>engine</em>. This part is a string naming the type of
 database engine for the database. It must always be followed by a colon, <code>:</code>.
 There is no formal list of supported engines, though certain implementations
@@ -239,7 +239,7 @@ have I overlooked? What have I got wrong? Let me know!</p>
 <li id="fn:1">
 <p>As in not surprised at all. Though I was hoping!<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
 <li id="fn:2">
-<p>DSNs for Perl&rsquo;s [DBI] aren&rsquo;t much better: <code>dbi:&lt;driver&gt;:&lt;driver-specific-stuff&gt;</code>.<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+<p>DSNs for Perl&rsquo;s <a href="https://metacpan.org/module/DBI" title="MetaCPAN: DBI">DBI</a> aren&rsquo;t much better: <code>dbi:&lt;driver&gt;:&lt;driver-specific-stuff&gt;</code>.<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
 </ol>
 </div>
 
