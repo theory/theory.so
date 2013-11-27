@@ -20,7 +20,7 @@ format is simply:
     jdbc:<jdbc-specific-stuff>
 
 Turns out that JDBC URLs are [barely URLs at all]. I mean, fine, according to
-[RFC 2396] they start with the `jdbc:` scheme followed by whatever. According
+[RFC 3986] they start with the `jdbc:` scheme followed by whatever. According
 to the [JDBC docs], what comes after the scheme is defined as follows:
 
     jdbc:<subprotocol>:<subname>
@@ -151,9 +151,9 @@ challenges to standardization.
 First, the requirement that the authority part must include a host address
 prevents the specification of a URI with a username that can be used to connect
 to a Unix socket. PostgreSQL and MySQL, among others provide authenticated
-socket connections. Fortunately [RFC 2396] does not seem to require the host
-name, and, as a precedent, neither do [file URIs]. So I'm thinking of allowing
-something like this to connect to a PostgreSQL database
+socket connections. While [RFC 3986] requires the host name, its predecessor,
+[RFC 2396], does not. Furthermore, as a precedent, neither do [file URIs]. So
+I'm thinking of allowing something like this to connect to a PostgreSQL database
 
     db:pg://postgres:secr3t@/
 
@@ -173,19 +173,14 @@ such variation. So how is one to know whether the path is a file path or a
 named database? The two variants cannot be distinguished.
 
 [RFC 2396] is quite explicit that the path part must be absolute when following
-an authority part. It does allow an "opaque part" instead of an absolute path,
-but in the absence of a slash, I'm unable to figure out how to separate it from the host name.
-
-The only solution I have so far found is to require a second slash for absolute
-paths. Engines that use a simple name or relative path can have it just after
-the slash, while an absolute path could use a second slash:
+an authority part. But [RFC 3986] forbids the double slash only when there is
+no authority part. Therefore, I think it might be best to require a second
+slash for absolute paths. Engines that use a simple name or relative path can
+have it just after the slash, while an absolute path could use a second slash:
 
 * Absolute: db:firebird://localhost//tmp/test.gdb
 * Relative: db:firebird://localhost/db/test.gdb
 * Name: db:postgresql://localhost/template1
-
-Naturally, [RFC 2396]'s prohibition on the second slash gives me pause. I'm not
-sure how to resolve this issue. Suggestions appreciated!
 
 That's It
 ---------
@@ -208,7 +203,8 @@ have I overlooked? What have I got wrong? Let me know!
 [URI Scheme]: http://en.wikipedia.org/wiki/URI_scheme "Wikipedia: “URI Scheme”"
 [JDBC URLs]: http://www.jguru.com/faq/view.jsp?EID=690 "jGuru: “What is a database URL?”"
 [barely URLs at all]: https://groups.google.com/forum/#!topic/comp.lang.java.programmer/twkIYNaDS64 "comp.lang.java.programmer: ”JDBC URLs ...not really URLs?“"
-[RFC 2396]: http://www.ietf.org/rfc/rfc2396.txt "Uniform Resource Identifiers (URI): Generic Syntax"
+[RFC 3986]: http://www.ietf.org/rfc/rfc3986.txt "Uniform Resource Identifier (URI): Generic Syntax"
+[RFC 2396]: http://www.ietf.org/rfc/rfc3986.txt "Uniform Resource Identifiers (URI): Generic Syntax"
 [JDBC docs]: http://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/connection.html#997649 "Getting Started with the JDBC API: “JDBC URLs”" 
 [DBI]: https://metacpan.org/module/DBI "MetaCPAN: DBI"
 [PostgreSQL libpq URIs]: http://www.postgresql.org/docs/9.3/static/libpq-connect.html#LIBPQ-CONNSTRING "PostgreSQL Documentation: “Connection Strings”"
