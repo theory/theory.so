@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: rfc | theory.so]]></title>
+  <link href="http://theory.so/categories/rfc/atom.xml" rel="self"/>
+  <link href="http://theory.so/"/>
+  <updated>2013-11-26T23:00:34-08:00</updated>
+  <id>http://theory.so/</id>
+  <author>
+    <name><![CDATA[David E. Wheeler]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[Toward A Database URI Standard]]></title>
+<link href="http://theory.so/rfc/2013/11/26/toward-a-database-uri-standard/"/>
+<updated>2013-11-26T20:14:00-08:00</updated>
+<id>http://theory.so/rfc/2013/11/26/toward-a-database-uri-standard</id>
+
+      <content type="html"><![CDATA[<p>As part of my effort to improve <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, I plan to add support for <a href="https://github.com/theory/sqitch/issues/100" title="Issue #100: “Add target command to configure target databases”">specifying
+deployment targets via URIs</a>. Inspired by <a href="http://git-scm.com/book/en/Git-Basics-Working-with-Remotes" title="Git Basics - Working with Remotes">Git remotes</a>, targets will greatly
+simplify the specification of databases to update &mdash; especially when stored as
+named targets in the configuration file.</p>
+
+<p>Before implementing it, though, I started casting about for a standard
+<a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI Scheme</a> for database connections. Imagine my surprise<sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup> to find that
+there is none! The closest thing to a standard is <a href="http://www.jguru.com/faq/view.jsp?EID=690" title="jGuru: “What is a database URL?”">JDBC URLs</a>. Formally, their
+format is simply:</p>
+
+<pre><code>jdbc:&lt;jdbc-specific-stuff&gt;
+</code></pre>
+
+<p>Turns out that JDBC URLs are <a href="https://groups.google.com/forum/#!topic/comp.lang.java.programmer/twkIYNaDS64" title="comp.lang.java.programmer: ”JDBC URLs ...not really URLs?“">barely URLs at all</a>. I mean, fine, according to
+<a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> they start with the <code>jdbc:</code> scheme followed by whatever. According
+to the <a href="http://docs.oracle.com/javase/6/docs/technotes/guides/jdbc/getstart/connection.html#997649" title="Getting Started with the JDBC API: “JDBC URLs”">JDBC docs</a>, what comes after the scheme is defined as follows:</p>
+
+<pre><code>jdbc:&lt;subprotocol&gt;:&lt;subname&gt;
+</code></pre>
+
+<p>The &ldquo;subprotocol&rdquo; is simply a driver name, while the the format of the &ldquo;subname
+can vary, depending on the subprotocol, and it can have any internal syntax the
+driver writer chooses, including a subsubname.&rdquo; In other words, it can be
+anything at all. Not very satisfying, or particularly &ldquo;standard.&rdquo;<sup id="fnref:2"><a href="#fn:2" rel="footnote">2</a></sup></p>
+
+<p>In poking around the net, however, I found a fair number of database URI
+formats defined by various projects:</p>
+
+<ul>
+<li><p><a href="http://www.postgresql.org/docs/9.3/static/libpq-connect.html#LIBPQ-CONNSTRING" title="PostgreSQL Documentation: “Connection Strings”">PostgreSQL libpq URIs</a>
+<code>postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&amp;...]</code></p></li>
+<li><p><a href="http://docs.sqlalchemy.org/en/rel_0_9/core/engines.html#database-urls" title="SQLAlchemy Documentation: “Database Urls”">SQLAlchemy URLs</a>:
+<code>dialect[+driver:]//[username[:password]@host[:port]/database</code></p></li>
+<li><p><a href="http://docs.stackato.com/3.0/user/services/data-services.html#database-url" title="Stackato Documentation: “DATABASE_URL”">Stackato database URLs</a>:
+<code>protocol://[username[:password]@host[:port]/database_name</code></p></li>
+<li><p><a href="https://github.com/kennethreitz/dj-database-url" title="DJ-Database-URL on GitHub">Django database URLs</a>:
+<code>ENGINE://[USER[:PASSWORD]@][HOST][:PORT]/DATABASE</code></p></li>
+<li><p><a href="https://github.com/glenngillen/rails-database-url" title="rails-database-url on GitHub">Rails database URLs</a>:
+<code>adapter://[userinfo@][hostname][:port]/database</code></p></li>
+</ul>
+
+
+<p>All very similar, right? Most database engines support all or a subset of these
+connection parts in common:</p>
+
+<ul>
+<li>username</li>
+<li>password</li>
+<li>host address</li>
+<li>port</li>
+<li>database name</li>
+<li>configuration parameters</li>
+</ul>
+
+
+<p>So why not define a standard database URI format with all those parts, and use
+them where appropriate for each engine? It&rsquo;s all right there, just like
+<a href="http://tools.ietf.org/html/rfc2616#page-19" title="RFC 2616: “http URL”">http URLs</a>.</p>
+
+<h2>The Proposal</h2>
+
+<p>Here&rsquo;s <a href="https://github.com/theory/uri-db" title="Database URI on GitHub">my proposal</a>. Formally, it&rsquo;s an opaque URI like JDBC. All database URIs
+start with the scheme <code>db:</code>. But in this case, the opaque part is an embedded
+URI that may be in one of two formats:</p>
+
+<pre><code>engine://[username[:password]@]host[:port][/dbname][?params]
+engine:[dbname][?params]
+</code></pre>
+
+<p>In other words, a pretty typical http- or mailto-style URI format. We embed it
+in a <code>db:</code> URI in order to identify the URI as a database URI, and to have a
+single reasonable scheme to register. Informally, it&rsquo;s simplest to think of a
+database URI as a single URI starting with the combination of the scheme and
+the engine, e.g., <code>db:mysql</code>.</p>
+
+<p>Some notes on the formats:</p>
+
+<ul>
+<li><p>The Database URI <em>scheme</em> is <code>db</code>. Consequently, database URIs always start
+with <code>db:</code>. This is the <a href="http://en.wikipedia.org/wiki/URI_scheme" title="Wikipedia: “URI Scheme”">URI scheme</a> that defines a database URI.</p></li>
+<li><p>Next comes the database <em>engine</em>. This part is a string naming the type of
+database engine for the database. It must always be followed by a colon, <code>:</code>.
+There is no formal list of supported engines, though certain implementations
+may specify engine-specific semantics, such as a default port.</p></li>
+<li><p>The <em>authority</em> part is separated from the engine by a double slash, <code>//</code>,
+and terminated by the next slash or end of the URI. It consists of an
+optional user-information part, terminated by <code>@</code> (e.g.,
+<code>username:password@</code>); a required host address (e.g., domain name or IP
+address); and an optional port number, preceded by a colon, <code>:</code>.</p></li>
+<li><p>The <em>path</em> part specifies the database name or path. For URIs that contain
+an authority part, a path specifying a file name must be absolute. URIs
+without an authority may use absolute or relative paths.</p></li>
+<li><p>The optional <em>query</em> part, separated by a question mark, <code>?</code>, contains
+<code>key=value</code> pairs separated by a semicolon, <code>;</code>, or ampersand, <code>&amp;</code>. These
+parameters may be used to configure a database connection with parameters not
+directly supported by the rest of the URI format.</p></li>
+</ul>
+
+
+<h3>Examples</h3>
+
+<p>Here are some database URIs without an authority part, which is typical for
+non-server engines such as <a href="http://sqlite.org/" title="SQLite Home Page">SQLite</a>, where the path part is a relative or
+absolute file name:</p>
+
+<ul>
+<li><code>db:sqlite:</code></li>
+<li><code>db:sqlite:foo.db</code></li>
+<li><code>db:sqlite:../foo.db</code></li>
+<li><code>db:sqlite:/var/db/foo.sqlite</code></li>
+</ul>
+
+
+<p>Other engines may use a database name rather than a file name:</p>
+
+<ul>
+<li><code>db:ingres:mydb</code></li>
+<li><code>db:postgresql:template1</code></li>
+</ul>
+
+
+<p>When a URI includes an authority part, it must be preceded by a double slash:</p>
+
+<ul>
+<li><code>db:postgresql://example.com</code></li>
+<li><code>db:mysql://root@localhost</code></li>
+<li><code>db:pg://postgres:secr3t@example.net</code></li>
+</ul>
+
+
+<p>To add the database name, separate it from the authority by a single slash:</p>
+
+<ul>
+<li><code>db:postgresql://example.com/template1</code></li>
+<li><code>db:mongodb://localhost:27017/myDatabase</code></li>
+<li><code>db:oracle://scott:tiger@foo.com/scott</code></li>
+</ul>
+
+
+<p>Some databases, such as Firebird, take both a host name and a file path.
+These paths must be absolute:</p>
+
+<ul>
+<li><code>db:firebird://localhost/tmp/test.gdb</code></li>
+<li><code>db:firebird://localhost/C:/temp/test.gdb</code></li>
+</ul>
+
+
+<p>Any URI format may optionally have a query part containing key/value pairs:</p>
+
+<ul>
+<li><code>db:sqlite:foo.db?foreign_keys=ON;journal_mode=WAL</code></li>
+<li><code>db:pg://localhost:5433/postgres?client_encoding=utf8;connect_timeout=10</code></li>
+</ul>
+
+
+<h2>Issues</h2>
+
+<p>In discussing this proposal with various folks, I&rsquo;ve become aware of a few
+challenges to standardization.</p>
+
+<p>First, the requirement that the authority part must include a host address
+prevents the specification of a URI with a username that can be used to connect
+to a Unix socket. PostgreSQL and MySQL, among others provide authenticated
+socket connections. Fortunately <a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> does not seem to require the host
+name, and, as a precedent, neither do <a href="http://en.wikipedia.org/wiki/File_URI_scheme#Examples" title="Wikipedia: “File URI Scheme: Examples”">file URIs</a>. So I&rsquo;m thinking of allowing
+something like this to connect to a PostgreSQL database</p>
+
+<pre><code>db:pg://postgres:secr3t@/
+</code></pre>
+
+<p>In short, it makes sense to allow the user information without a host name.</p>
+
+<p>The second issue is the disallowing of relative file names in the path part
+following an authority part. The problem here is that most database engines
+don&rsquo;t use paths for database names, so a leading slash makes no sense. For
+example, in <code>db:pg:localhost/foo</code>, the PostgreSQL database name is <code>foo</code>, not
+<code>/foo</code>. Yet in <code>db:firebird:localhost/foo</code>, the Firebird database name <em>is</em> a
+path, <code>/foo</code>. So each engine implementation must know whether or not the path
+part is a file name.</p>
+
+<p>But some databases may in fact allow a path to be specified for a local
+connection, and a name for a remote connection. <a href="https://metacpan.org/pod/DBD::Informix#INFORMIX-CONNECTION-SEMANTICS" title="MetaCPAN: “Informix Connection Semantics”">Informix</a> appears to support
+such variation. So how is one to know whether the path is a file path or a
+named database? The two variants cannot be distinguished.</p>
+
+<p><a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a> is quite explicit that the path part must be absolute when following
+an authority part. It does allow an &ldquo;opaque part&rdquo; instead of an absolute path,
+but in the absence of a slash, I&rsquo;m unable to figure out how to separate it from the host name.</p>
+
+<p>The only solution I have so far found is to require a second slash for absolute
+paths. Engines that use a simple name or relative path can have it just after
+the slash, while an absolute path could use a second slash:</p>
+
+<ul>
+<li>Absolute: db:firebird://localhost//tmp/test.gdb</li>
+<li>Relative: db:firebird://localhost/db/test.gdb</li>
+<li>Name: db:postgresql://localhost/template1</li>
+</ul>
+
+
+<p>Naturally, <a href="http://www.ietf.org/rfc/rfc2396.txt" title="Uniform Resource Identifiers (URI): Generic Syntax">RFC 2396</a>&rsquo;s prohibition on the second slash gives me pause. I&rsquo;m not
+sure how to resolve this issue. Suggestions appreciated!</p>
+
+<h2>That&rsquo;s It</h2>
+
+<p>The path issue aside, I feel like this is a pretty simple proposal, and could
+have wide utility. I&rsquo;ve already knocked out a Perl reference implementation,
+<a href="https://github.com/theory/uri-db/blob/master/lib/URI/db.pm" title="URI::db on GitHub">URI::db</a>. Given the wide availability of URI parsers in various programming
+languages, I wouldn&rsquo;t expect it to be difficult to port, either.</p>
+
+<p>The <a href="https://github.com/theory/uri-db/" title="uri-db on GitHub">uri-db project</a> is the canonical home for the proposal for now, so check
+there for updates. And your feedback would be appreciated! What other issues
+have I overlooked? What have I got wrong? Let me know!</p>
+<div class="footnotes">
+<hr/>
+<ol>
+<li id="fn:1">
+<p>As in not surprised at all. Though I was hoping!<a href="#fnref:1" rev="footnote">&#8617;</a></p></li>
+<li id="fn:2">
+<p>DSNs for Perl&rsquo;s [DBI] aren&rsquo;t much better: <code>dbi:&lt;driver&gt;:&lt;driver-specific-stuff&gt;</code>.<a href="#fnref:2" rev="footnote">&#8617;</a></p></li>
+</ol>
+</div>
+
+]]></content>
+    </entry>
+  
+</feed>
+
