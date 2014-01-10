@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sqitch | theory.so]]></title>
   <link href="http://theory.so/categories/sqitch/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2013-11-27T09:26:46-08:00</updated>
+  <updated>2014-01-09T16:51:19-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,108 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[Sqitch on Target]]></title>
+<link href="http://theory.so/sqitch/2014/01/09/sqitch-on-target/"/>
+<updated>2014-01-09T15:27:00-08:00</updated>
+<id>http://theory.so/sqitch/2014/01/09/sqitch-on-target</id>
+
+      <content type="html"><![CDATA[<p>At the end of the day last week, I released <a href="http://sqitch.org/">Sqitch</a> v0.990. This was a
+pretty big release, with lots of changes. The most awesome addition, in my
+opinion, is <em>Named Deployment targets.</em></p>
+
+<p>In previous versions of Sqitch, one
+could set default values for the database to deploy to, but needed to use the
+<code>--db-*</code> options to deploy to another database. This was fine for
+development: just set the default on <code>localhost</code> and go. But when it came
+time to deploy to other servers for testing, QA, or production, it was a bit
+of a PITA. At <a href="http://www.iovation.com/">work</a>, I ended up writing deployment docs that defined a slew
+of environment variables, and our operations team needed to adjust those
+variables to deploy to various servers. It was ugly, and frankly a bit of a
+pain in the ass.</p>
+
+<p>I thought it&rsquo;d be better to have named deployment targets, so instead of
+changing a bunch of environment variables in order to set a bunch of options,
+we could just name a target and go. I borrowed the idea from <a href="http://git-scm.com/docs/git-remote">Git remotes</a>,
+and started a <a href="https://github.com/theory/uri-db">database URI spec</a> (mentioned <a href="/rfc/2013/11/26/toward-a-database-uri-standard/">previously</a>) to simplify things
+a bit. Here&rsquo;s how it works. Say you have a PostgreSQL Sqitch project called
+&ldquo;Flipr&rdquo;. While doing development, you&rsquo;ll want to have a local database to
+deploy to. There is also a QA database and a production database. Use the
+<a href="https://metacpan.org/pod/sqitch-target"><code>target</code></a> command to set them up:</p>
+
+<pre><code class="sh Sqitch Targeting">sqitch target add dev db:pg:flipr
+sqitch target add qa db:pg://sqitch@qa.example.com/flipr
+sqitch target add prod db:pg://sqitch@db.example.com/flipr
+</code></pre>
+
+<p>Like <a href="http://git-scm.com/docs/git-remote">Git remotes</a>, we just have names and URIs. To <a href="https://metacpan.org/pod/sqitch-deploy"><code>deploy</code></a> to a database,
+just name it:</p>
+
+<pre><code class="sh Deploy to Dev">sqitch deploy dev
+</code></pre>
+
+<p>Want to deploy to QA? Name it:</p>
+
+<pre><code class="sh Deploy to QA">sqitch deploy qa
+</code></pre>
+
+<p>This works with any of the commands that connect to a database, including
+<a href="https://metacpan.org/pod/sqitch-revert"><code>revert</code></a> and <a href="https://metacpan.org/pod/sqitch-status"><code>status</code></a>:</p>
+
+<pre><code class="sh Targeted revert, Status">sqitch revert --to @HEAD^^ dev
+sqitch status prod
+</code></pre>
+
+<p>The great thing about this feature is that the configuration is all stored
+in the project Sqitch configuration file. That means you can commit all the
+connection URIs for all likely targets in directly to the project repository.
+If they change, just change them in the config, commit, and push.</p>
+
+<p>Targets don&rsquo;t always have to be configured in advance, of course. The names
+essentially stand in for the URIs, so you can connect to an unnamed target
+just by using a URI:</p>
+
+<pre><code class="sh URI Targeting">sqitch log db:postgres://db1.example.net/flipr_export
+</code></pre>
+
+<p>Of course there are still defaults specific to each engine. I generally like
+to set the &ldquo;dev&rdquo; target as the default deploy target, like so:</p>
+
+<pre><code class="sh Configure Default Target">sqitch config core.pg.target dev
+</code></pre>
+
+<p>This sets the &ldquo;dev&rdquo; target as the default for the PostgreSQL engine. So now I
+can do stuff with the &ldquo;dev&rdquo; target without mentioning it at all:</p>
+
+<pre><code class="sh Rebase Dev Target">sqitch rebase --onto HEAD^4
+</code></pre>
+
+<p>Named targets may also have a couple other attributes associated with them:</p>
+
+<ul>
+<li><code>client</code>: The command-line client to use for a target.</li>
+<li><code>registry</code>: The name of the Sqitch registry schema or database, which defaults to, simply, <code>sqitch</code>.</li>
+</ul>
+
+
+<p>Now that I&rsquo;ve started using it, I can think of other things I&rsquo;d like to add to targets in the future, including:</p>
+
+<ul>
+<li><a href="https://github.com/theory/sqitch/issues/143">Setting other attributes</a>, such as the deployment mode, whether to verify changes, and variables.</li>
+<li><a href="https://github.com/theory/sqitch/issues/135">Allowing multiple URIs</a>, for concurrent database deployments!</li>
+</ul>
+
+
+<p>Pretty cool stuff ahead, IMO. I&rsquo;m grateful to <a href="http://www.iovation.com/">work</a> for letting me hack on
+Sqitch.</p>
+]]></content>
+    </entry>
   
     <entry>
       
@@ -56,40 +158,37 @@ create the template files. Custom templates can live in <code>`sqitch
 latter. Each template goes into a directory for the type of script, so we&rsquo;ll
 create them:</p>
 
-<p><code>sh Create template directories
-mkdir -p ~/.sqitch/templates/deploy
-mkdir -p ~/.sqitch/templates/revert
+<pre><code class="sh Create template directories">mkdir -p ~/.sqitch/templates/deploy
+mkdir -p ~/.sqitch/templates/revert 
 mkdir -p ~/.sqitch/templates/verify
-</code></p>
+</code></pre>
 
 <p>Copy the default templates for your preferred database engine; here I copy the
 Postgres templates:</p>
 
-<p><code>sh Copy default templates
-tmpldir=`sqitch --etc-path`/templates
+<pre><code class="sh Copy default templates">tmpldir=`sqitch --etc-path`/templates
 cp $tmpldir/deploy/pg.tmpl ~/.sqitch/templates/deploy/createtable.tmpl
 cp $tmpldir/revert/pg.tmpl ~/.sqitch/templates/revert/createtable.tmpl
 cp $tmpldir/verify/pg.tmpl ~/.sqitch/templates/verify/createtable.tmpl
 chmod -R +w ~/.sqitch/templates
-</code></p>
+</code></pre>
 
 <p>Here&rsquo;s what the default deploy template looks like:</p>
 
-<p>``` sql Default deploy template
-&ndash; Deploy [% change %]
+<pre><code class="sql Default deploy template">-- Deploy [% change %]
 [% FOREACH item IN requires -%]
-&ndash; requires: [% item %]
+-- requires: [% item %]
 [% END -%]
 [% FOREACH item IN conflicts -%]
-&ndash; conflicts: [% item %]
-[% END -%]</p>
+-- conflicts: [% item %]
+[% END -%]
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>&ndash; XXX Add DDLs here.</p>
+-- XXX Add DDLs here.
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <p>The code before the <code>BEGIN</code> names the template and lists dependencies, which
 is reasonably useful, so we&rsquo;ll leave it as-is. We&rsquo;ll focus on replacing that
@@ -98,79 +197,71 @@ statement. Start simple: just use the change name for the table name. In
 <code>~/.sqitch/templates/deploy/createtable.tmpl</code>, replace the comment with these
 lines:</p>
 
-<p><code>sql Add CREATE TABLE statement to deploy template
-CREATE TABLE [% change %] (
+<pre><code class="sql Add CREATE TABLE statement to deploy template">CREATE TABLE [% change %] (
     -- Add columns here.
 );
-</code></p>
+</code></pre>
 
 <p>In the revert template, <code>~/.sqitch/templates/deploy/createtable.tmpl</code>, replace
 the comment with a <code>DROP TABLE</code> statement:</p>
 
-<p><code>sql Add DROP TABLE statement to revert template
-DROP TABLE [% change %];
-</code></p>
+<pre><code class="sql Add DROP TABLE statement to revert template">DROP TABLE [% change %];
+</code></pre>
 
 <p>And finally, in the verify template,
 <code>~/.sqitch/templates/verify/createtable.tmpl</code>, replace the comment with a
 simple <code>SELECT</code> statement, which is just enough to verify the creation of a
 table:</p>
 
-<p><code>sql Add SELECT statement to verify template
-SELECT * FROM [% change %];
-</code></p>
+<pre><code class="sql Add SELECT statement to verify template">SELECT * FROM [% change %];
+</code></pre>
 
 <p>Great, we&rsquo;ve created a set of simple customized templates for adding a
 <code>CREATE TABLE</code> change to a Sqitch project. To use them, just pass the
 <code>--template</code> option to <a href="http://metacpan.org/module/sqitch-add" title="Add a database change to the Sqitch plan"><code>sqitch add</code></a>, like so:</p>
 
-<p>``` sh Use the createtable template</p>
-
-<blockquote><p>sqitch add widgets &ndash;template createtable -n &lsquo;Add widgets table.&rsquo;
+<pre><code class="sh Use the createtable template">&gt; sqitch add widgets --template createtable -n 'Add widgets table.'
 Created deploy/widgets.sql
 Created revert/widgets.sql
 Created verify/widgets.sql
-Added &ldquo;widgets&rdquo; to sqitch.plan
-```</p></blockquote>
+Added "widgets" to sqitch.plan
+</code></pre>
 
 <p>Now have a look at <code>deploy/widgets.sql</code>:</p>
 
-<p>``` sql Widgets Deploy Script
-&ndash; Deploy widgets</p>
+<pre><code class="sql Widgets Deploy Script">-- Deploy widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>CREATE TABLE widgets (
-    &ndash; Add columns here.
-);</p>
+CREATE TABLE widgets (
+    -- Add columns here.
+);
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <p>Cool! The revert template should also have done its job. Here&rsquo;s
 <code>revert/widgets.sql</code>:</p>
 
-<p>``` sql Widgets Revert Script
-&ndash; Revert widgets</p>
+<pre><code class="sql Widgets Revert Script">-- Revert widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>DROP TABLE widgets;</p>
+DROP TABLE widgets;
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <p>And the verify script, <code>verify/widgets.sql</code>:</p>
 
-<p>``` sql Widgets Verify Script
-&ndash; Verify widgets</p>
+<pre><code class="sql Widgets Verify Script">-- Verify widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SELECT * FROM widgets;</p>
+SELECT * FROM widgets;
 
-<p>ROLLBACK;
-```</p>
+ROLLBACK;
+</code></pre>
 
 <h2>Custom Table Name</h2>
 
@@ -180,13 +271,12 @@ dead simple default <a href="https://metacpan.org/module/sqitch-add#Syntax" titl
 statements. Try using them with custom variables for the schema and table
 names:</p>
 
-<p>``` sql Deploy table with schema and table
-SET search_path TO [% IF schema ][% schema %],[% END %]public;</p>
+<pre><code class="sql Deploy table with schema and table">SET search_path TO [% IF schema ][% schema %],[% END %]public;
 
-<p>CREATE TABLE [% IF table %][% table %][% ELSE %][% change %][% END %] (
-    &ndash; Add columns here.
+CREATE TABLE [% IF table %][% table %][% ELSE %][% change %][% END %] (
+    -- Add columns here.
 );
-```</p>
+</code></pre>
 
 <p>If the <code>schema</code> variable is set, the <code>search_path</code>, which determines where
 objects will go, gets set to <code>$schema,public</code>. If <code>schema</code> is not set, the
@@ -198,63 +288,57 @@ change name, as before.</p>
 
 <p>The revert script needs the same treatment:</p>
 
-<p><code>sql Revert table with schema and table
-SET search_path TO [% IF schema ][% schema %],[% END %]public;
+<pre><code class="sql Revert table with schema and table">SET search_path TO [% IF schema ][% schema %],[% END %]public;
 DROP TABLE [% IF table %][% table %][% ELSE %][% change %][% END %];
-</code></p>
+</code></pre>
 
 <p>As does the verify script:</p>
 
-<p><code>sql Verify table with schema and table
-SET search_path TO [% IF schema ][% schema %],[% END %]public;
+<pre><code class="sql Verify table with schema and table">SET search_path TO [% IF schema ][% schema %],[% END %]public;
 SELECT * FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
-</code></p>
+</code></pre>
 
 <p>Take it for a spin:</p>
 
-<p>``` sh Add table to schema</p>
-
-<blockquote><p>sqitch add corp_widgets &ndash;template createtable \
-  &ndash;set schema=corp &ndash;set table=widgets \
-  -n &lsquo;Add corp.widgets table.&rsquo;
+<pre><code class="sh Add table to schema">&gt; sqitch add corp_widgets --template createtable \
+  --set schema=corp --set table=widgets \
+  -n 'Add corp.widgets table.'
 Created deploy/corp_widgets.sql
 Created revert/corp_widgets.sql
 Created verify/corp_widgets.sql
-Added &ldquo;corp_widgets&rdquo; to sqitch.plan
-```</p></blockquote>
+Added "corp_widgets" to sqitch.plan
+</code></pre>
 
 <p>The resulting deploy script will create <code>corp.widgets</code>:</p>
 
-<p>``` sql Deploy table to schema
-&ndash; Deploy corp_widgets</p>
+<pre><code class="sql Deploy table to schema">-- Deploy corp_widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SET search_path TO corp,public;</p>
+SET search_path TO corp,public;
 
-<p>CREATE TABLE widgets (
-    &ndash; Add columns here.
-);</p>
+CREATE TABLE widgets (
+    -- Add columns here.
+);
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <p>Cool, right? The revert and verify scripts of course yield similar results.
 Omitting the <code>--set</code> option, the template falls back on the change name:</p>
 
-<p>``` sql Deploy a table to public
-&ndash; Deploy widgets</p>
+<pre><code class="sql Deploy a table to public">-- Deploy widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SET search_path TO public;</p>
+SET search_path TO public;
 
-<p>CREATE TABLE widgets (
-    &ndash; Add columns here.
-);</p>
+CREATE TABLE widgets (
+    -- Add columns here.
+);
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <h2>Add Columns</h2>
 
@@ -264,64 +348,58 @@ for custom variables, too. For the purposes of our <code>CREATE TABLE</code> tem
 let&rsquo;s add columns. Replace the <code>-- Add columns here</code> comment in the deploy
 simple with these three lines:</p>
 
-<p><code>sql Deploy script with columns
-[% FOREACH col IN column -%]
+<pre><code class="sql Deploy script with columns">[% FOREACH col IN column -%]
     [% col %] TEXT NOT NULL,
 [% END -%]
-</code></p>
+</code></pre>
 
 <p>We can similarly improve the verify script: change its <code>SELECT</code> statement to:</p>
 
-<p><code>sql Verify script with columns
-SELECT [% FOREACH col IN column %][% col %], [% END %]
+<pre><code class="sql Verify script with columns">SELECT [% FOREACH col IN column %][% col %], [% END %]
   FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
-</code></p>
+</code></pre>
 
 <p>Just pass multiple <code>--set</code> (or <code>-s</code>) options to <code>sqitch add</code> to add as many
 columns as you like:</p>
 
-<p>``` sh Add table with columns</p>
-
-<blockquote><p>sqitch add corp_widgets &ndash;template createtable \
+<pre><code class="sh Add table with columns">&gt; sqitch add corp_widgets --template createtable \
   -s schema=corp -s table=widgets \
   -s column=id -s column=name -s column=quantity \
-  -n &lsquo;Add corp.widgets table.&rsquo;
-```</p></blockquote>
+  -n 'Add corp.widgets table.'
+</code></pre>
 
 <p>Behold the resulting deploy script!</p>
 
-<p>``` sql Deploy table with columns
-&ndash; Deploy corp_widgets</p>
+<pre><code class="sql Deploy table with columns">-- Deploy corp_widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SET search_path TO corp,public;</p>
+SET search_path TO corp,public;
 
-<p>CREATE TABLE widgets (
+CREATE TABLE widgets (
     id TEXT NOT NULL,
     name TEXT NOT NULL,
     quantity TEXT NOT NULL,
-);</p>
+);
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <p>You still have to edit the resulting file, of course. Maybe <code>NULL</code>s should be
 allowed in the <code>name</code> column. And I suspect that <code>quantity</code> ought be an
 integer. There&rsquo;s that pesky trailing comma to remove, too. The verify script
 suffers the same deficiency:</p>
 
-<p>``` sql Verify each column
-&ndash; Verify corp_widgets</p>
+<pre><code class="sql Verify each column">-- Verify corp_widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SET search_path TO corp,public;
-SELECT id, name, quantity,
-  FROM widgets;</p>
+SET search_path TO corp,public;
+SELECT id, name, quantity, 
+  FROM widgets;
 
-<p>ROLLBACK;
-```</p>
+ROLLBACK;
+</code></pre>
 
 <p>Still, these templates remove much of the grudge work of adding <code>CREATE TABLE</code>
 changes, giving you the scaffolding on which to build the objects you need.</p>
@@ -340,64 +418,58 @@ like and you&rsquo;ll be in business.</p>
 variable, which is implicitly created in the <code>FOREACH</code> loop. Simply replace
 the comma in the template with the expression <code>[% loop.last ? '' : ',' %]</code>:</p>
 
-<p><code>sql Use the loop variable
-[% FOREACH col IN column -%]
+<pre><code class="sql Use the loop variable">[% FOREACH col IN column -%]
     [% col %] TEXT NOT NULL[% loop.last ? '' : ',' %]
 [% END -%]
-</code></p>
+</code></pre>
 
 <p>Now the comma will be omitted for the last iteration of the loop. The fix for
 the verify script is even simpler: use <code>join()</code> <a href="http://tt2.org/docs/manual/VMethods.html" title="Template Toolkit Docs: Virtual Methods">VMethod</a> instead of a
 <code>FOREACH</code> loop to emit all the columns in a single expression:</p>
 
-<p><code>sql Join verify columns
-SELECT [% column.join(', ') %]
+<pre><code class="sql Join verify columns">SELECT [% column.join(', ') %]
   FROM [% IF table %][% table %][% ELSE %][% change %][% END %];
-</code></p>
+</code></pre>
 
 <p>Really simplifies things, doesn&rsquo;t it?</p>
 
 <p>Better still, going back to the deploy template, we can add data types for
 each column. Try this on for size:</p>
 
-<p><code>sh Deploy with typed columns
-[% FOREACH col IN column -%]
+<pre><code class="sh Deploy with typed columns">[% FOREACH col IN column -%]
     [% col %] [% type.item( loop.index ) or 'TEXT' %] NOT NULL[% loop.last ? '' : ',' %]
 [% END -%]
 );
-</code></p>
+</code></pre>
 
 <p>As we iterate over the list of columns, simply pass <code>loop.index</code> to the
 <code>item()</code> <a href="http://tt2.org/docs/manual/VMethods.html" title="Template Toolkit Docs: Virtual Methods">VMethod</a> on the <code>type</code> variable to get the corresponding type.
 Then specify a type for each column when you create the change:</p>
 
-<p>``` sh Create table with typed columns</p>
-
-<blockquote><p>sqitch add corp_widgets &ndash;template createtable \
+<pre><code class="sh Create table with typed columns">&gt; sqitch add corp_widgets --template createtable \
   -s schema=corp -s table=widgets \
   -s column=id -s type=SERIAL \
   -s column=name -s type=TEXT \
   -s column=quantity -s type=INTEGER \
-  -n &lsquo;Add corp.widgets table.&rsquo;
-```</p></blockquote>
+  -n 'Add corp.widgets table.'
+</code></pre>
 
 <p>This yields a much more comprehensive deploy script:</p>
 
-<p>``` sql Deploy table with typed columns
-&ndash; Deploy corp_widgets</p>
+<pre><code class="sql Deploy table with typed columns">-- Deploy corp_widgets
 
-<p>BEGIN;</p>
+BEGIN;
 
-<p>SET search_path TO corp,public;</p>
+SET search_path TO corp,public;
 
-<p>CREATE TABLE widgets (
+CREATE TABLE widgets (
     id SERIAL NOT NULL,
     name TEXT NOT NULL,
     quantity INTEGER NOT NULL
-);</p>
+);
 
-<p>COMMIT;
-```</p>
+COMMIT;
+</code></pre>
 
 <h2>Go Crazy</h2>
 

@@ -9,8 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="As part of my effort to improve Sqitch, I plan to add support for specifying
-deployment targets via URIs. Inspired by Git remotes, targets will &hellip;">
+  <meta name="description" content="At the end of the day last week, I released Sqitch v0.990. This was a
+pretty big release, with lots of changes. The most awesome addition, in my &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +72,159 @@ deployment targets via URIs. Inspired by Git remotes, targets will &hellip;">
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+
+
+
+
+
+
+    <article >
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="/sqitch/2014/01/09/sqitch-on-target/">Sqitch on Target</a>
+
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-09T15:27:00-08:00" pubdate data-updated="true"> 9 January 2014</time>
+        
+         &bull; <a rel="bookmark" href="/sqitch/2014/01/09/sqitch-on-target/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>At the end of the day last week, I released <a href="http://sqitch.org/">Sqitch</a> v0.990. This was a
+pretty big release, with lots of changes. The most awesome addition, in my
+opinion, is <em>Named Deployment targets.</em></p>
+
+<p>In previous versions of Sqitch, one
+could set default values for the database to deploy to, but needed to use the
+<code>--db-*</code> options to deploy to another database. This was fine for
+development: just set the default on <code>localhost</code> and go. But when it came
+time to deploy to other servers for testing, QA, or production, it was a bit
+of a PITA. At <a href="http://www.iovation.com/">work</a>, I ended up writing deployment docs that defined a slew
+of environment variables, and our operations team needed to adjust those
+variables to deploy to various servers. It was ugly, and frankly a bit of a
+pain in the ass.</p>
+
+<p>I thought it&rsquo;d be better to have named deployment targets, so instead of
+changing a bunch of environment variables in order to set a bunch of options,
+we could just name a target and go. I borrowed the idea from <a href="http://git-scm.com/docs/git-remote">Git remotes</a>,
+and started a <a href="https://github.com/theory/uri-db">database URI spec</a> (mentioned <a href="/rfc/2013/11/26/toward-a-database-uri-standard/">previously</a>) to simplify things
+a bit. Here&rsquo;s how it works. Say you have a PostgreSQL Sqitch project called
+&ldquo;Flipr&rdquo;. While doing development, you&rsquo;ll want to have a local database to
+deploy to. There is also a QA database and a production database. Use the
+<a href="https://metacpan.org/pod/sqitch-target"><code>target</code></a> command to set them up:</p>
+
+<figure class='code'><figcaption><span>Sqitch Targeting</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch target add dev db:pg:flipr
+</span><span class='line'>sqitch target add qa db:pg://sqitch@qa.example.com/flipr
+</span><span class='line'>sqitch target add prod db:pg://sqitch@db.example.com/flipr
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Like <a href="http://git-scm.com/docs/git-remote">Git remotes</a>, we just have names and URIs. To <a href="https://metacpan.org/pod/sqitch-deploy"><code>deploy</code></a> to a database,
+just name it:</p>
+
+<figure class='code'><figcaption><span>Deploy to Dev</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch deploy dev
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Want to deploy to QA? Name it:</p>
+
+<figure class='code'><figcaption><span>Deploy to QA</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch deploy qa
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This works with any of the commands that connect to a database, including
+<a href="https://metacpan.org/pod/sqitch-revert"><code>revert</code></a> and <a href="https://metacpan.org/pod/sqitch-status"><code>status</code></a>:</p>
+
+<figure class='code'><figcaption><span>Targeted revert, Status</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch revert --to @HEAD^^ dev
+</span><span class='line'>sqitch status prod
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The great thing about this feature is that the configuration is all stored
+in the project Sqitch configuration file. That means you can commit all the
+connection URIs for all likely targets in directly to the project repository.
+If they change, just change them in the config, commit, and push.</p>
+
+<p>Targets don&rsquo;t always have to be configured in advance, of course. The names
+essentially stand in for the URIs, so you can connect to an unnamed target
+just by using a URI:</p>
+
+<figure class='code'><figcaption><span>URI Targeting</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch log db:postgres://db1.example.net/flipr_export
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Of course there are still defaults specific to each engine. I generally like
+to set the &ldquo;dev&rdquo; target as the default deploy target, like so:</p>
+
+<figure class='code'><figcaption><span>Configure Default Target</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch config core.pg.target dev
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This sets the &ldquo;dev&rdquo; target as the default for the PostgreSQL engine. So now I
+can do stuff with the &ldquo;dev&rdquo; target without mentioning it at all:</p>
+
+<figure class='code'><figcaption><span>Rebase Dev Target</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sqitch rebase --onto HEAD^4
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Named targets may also have a couple other attributes associated with them:</p>
+
+<ul>
+<li><code>client</code>: The command-line client to use for a target.</li>
+<li><code>registry</code>: The name of the Sqitch registry schema or database, which defaults to, simply, <code>sqitch</code>.</li>
+</ul>
+
+
+<p>Now that I&rsquo;ve started using it, I can think of other things I&rsquo;d like to add to targets in the future, including:</p>
+
+<ul>
+<li><a href="https://github.com/theory/sqitch/issues/143">Setting other attributes</a>, such as the deployment mode, whether to verify changes, and variables.</li>
+<li><a href="https://github.com/theory/sqitch/issues/135">Allowing multiple URIs</a>, for concurrent database deployments!</li>
+</ul>
+
+
+<p>Pretty cool stuff ahead, IMO. I&rsquo;m grateful to <a href="http://www.iovation.com/">work</a> for letting me hack on
+Sqitch.</p>
+</div>
+
+
+    </article>
   
     
     
@@ -1242,7 +1395,7 @@ applications to change the data. Otherwise, how static is it, really?</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 – David E. Wheeler –
+  Copyright &copy; 2014 – David E. Wheeler –
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> –
   <a href="/atom.xml" title="Subscribe to theory.com">Feed</a>
 </p>
