@@ -329,7 +329,7 @@ with a more capable one. Simply install [Template Toolkit] to transparently
 upgrade your Sqitch templates. Template Toolkit's comprehensive feature set
 covers just about any functionality you could want out of a templating system.
 It's big and complex, but relatively straight-forward to install: just run
-`cpan Template`, `cpanm Tempate`, `yum install perl-Template-Toolkit`, or the
+`cpan Template`, `cpanm Template`, `yum install perl-Template-Toolkit`, or the
 like and you'll be in business.
 
 We can resolve the trailing comma issue thanks to Template Toolkit's `loop`
