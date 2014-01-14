@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sqitch | theory.so]]></title>
   <link href="http://theory.so/categories/sqitch/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2014-01-10T11:38:30-08:00</updated>
+  <updated>2014-01-13T16:33:41-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,179 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[Templating Tests with Sqitch]]></title>
+<link href="http://theory.so/sqitch/2014/01/13/templating-tests-with-sqitch/"/>
+<updated>2014-01-13T14:11:00-08:00</updated>
+<id>http://theory.so/sqitch/2014/01/13/templating-tests-with-sqitch</id>
+
+      <content type="html"><![CDATA[<p>Back in September, <a href="/sqitch/2013/09/06/sqitch-templating/">I described</a> how to create custom deploy, revert, and
+verify scripts for various types of <a href="http://sqitch.org/" title="Sane database schema change management">Sqitch</a> changes, such as adding a new
+table. Which is cool and all, but what I&rsquo;ve found while developing databases
+at <a href="http://iovation.com/">work</a> is that I nearly always want to create a test script with the same
+name as a newly-added change.</p>
+
+<p>So for the recent v0.990 release, the <a href="https://metacpan.org/pod/sqitch-add"><code>add</code> command</a> gained the ability to
+generate arbitrary script files from templates. To get it to work, we just
+have to create template files. Templates can go into <code>~/.sqitch/templates</code>
+(for personal use) or in <code>$(sqitch --etc-path)/templates</code> (for use by
+everyone on a system). The latter is where templates are installed by
+default. Here&rsquo;s what it looks like:</p>
+
+<pre><code class="sh List Default Templates">&gt; ls $(sqitch --etc-path)/templates
+deploy  revert  verify
+&gt; ls $(sqitch --etc-path)/templates/deploy
+firebird.tmpl  mysql.tmpl  oracle.tmpl  pg.tmpl  sqlite.tmpl
+</code></pre>
+
+<p>Each directory defines the type of script and the name of the directory in
+which it will be created. The contents are default templates, one for each
+engine.</p>
+
+<p>To create a default test template, all we have to do is create a template for our preferred engine in a directory named <code>test</code>. So I created <code>~/.sqitch/templates/test/pg.tmpl</code>. Here it is:</p>
+
+<pre><code class="sql Default pgTAP template">SET client_min_messages TO warning;
+CREATE EXTENSION IF NOT EXISTS pgtap;
+RESET client_min_messages;
+
+BEGIN;
+SELECT no_plan();
+-- SELECT plan(1);
+
+SELECT pass('Test [% change %]!');
+
+SELECT finish();
+ROLLBACK;
+</code></pre>
+
+<p>This is my standard boilerplate for tests, more or less. It just loads
+<a href="http://pgtap.org/">pgTAP</a>, sets the plan, runs the tests, finishes and rolls back. See this
+template in action:</p>
+
+<pre><code class="sh Add a change.">&gt; sqitch add whatever -n 'Adds whatever.'
+Created deploy/whatever.sql
+Created revert/whatever.sql
+Created test/whatever.sql
+Created verify/whatever.sql
+Added "whatever" to sqitch.plan
+</code></pre>
+
+<p>Cool, it added the test script. Here’s what it looks like:</p>
+
+<pre><code class="sql Generated test script">SET client_min_messages TO warning;
+CREATE EXTENSION IF NOT EXISTS pgtap;
+RESET client_min_messages;
+
+BEGIN;
+SELECT no_plan();
+-- SELECT plan(1);
+
+SELECT pass('Test whatever!');
+
+SELECT finish();
+ROLLBACK;
+</code></pre>
+
+<p>Note that it replaced the <code>change</code> variable in the call to <code>pass()</code>. All
+ready to start writing tests! Nice, right? If we don&rsquo;t want the test script
+created &ndash; for example when adding a column to a table for which a test
+already exists &ndash; we use the <code>--without</code> option to omit it:</p>
+
+<pre><code class="sh Add change without test">&gt; sqitch add add_timestamp_column --without test -n 'Adds whatever.'
+Created deploy/add_timestamp_column.sql
+Created revert/add_timestamp_column.sql
+Created verify/add_timestamp_column.sql
+Added "add_timestamp_column" to sqitch.plan
+</code></pre>
+
+<p>Naturally you&rsquo;ll want to update the existing test to validate the new column.</p>
+
+<p>In the <a href="/sqitch/2013/09/06/sqitch-templating/">previous templating post</a>, we added custom scripts as for <code>CREATE
+TABLE</code> changes; now we can add a test template, too. This one takes advantage
+of the advanced features of <a href="http://tt2.org/">Template Toolkit</a>. We name it
+<code>~/.sqitch/templates/test/createtable.tmpl</code> to complement the deploy,
+revert, and verify scripts created previously:</p>
+
+<pre><code class="sql CREATE TABLE test template">-- Test [% change %]
+SET client_min_messages TO warning;
+CREATE EXTENSION IF NOT EXISTS pgtap;
+RESET client_min_messages;
+
+BEGIN;
+SELECT no_plan();
+-- SELECT plan(1);
+
+SET search_path TO [% IF schema %][% schema %],[% END %]public;
+
+SELECT has_table('[% table or change %]');
+SELECT has_pk( '[% table or change %]' );
+
+[% FOREACH col IN column -%]
+SELECT has_column(        '[% table or change %]', '[% col %]' );
+SELECT col_type_is(       '[% table or change %]', '[% col %]', '[% type.item( loop.index ) or 'text' %]' );
+SELECT col_not_null(      '[% table or change %]', '[% col %]' );
+SELECT col_hasnt_default( '[% table or change %]', '[% col %]' );
+
+[% END %]
+SELECT finish();
+ROLLBACK;
+</code></pre>
+
+<p>As <a href="/sqitch/2013/09/06/sqitch-templating/">before</a>, we tell the <a href="https://metacpan.org/pod/sqitch-add"><code>add</code> command</a> to use the <code>createtable</code> templates:</p>
+
+<pre><code class="sh Create table with typed columns">&gt; sqitch add corp_widgets --template createtable \
+  -s schema=corp -s table=widgets \
+  -s column=id -s type=SERIAL \
+  -s column=name -s type=TEXT \
+  -s column=quantity -s type=INTEGER \
+  -n 'Add corp.widgets table.'
+</code></pre>
+
+<p>This yields a very nice test script to get you going:</p>
+
+<pre><code class="sql Generated Table Test">-- Test corp_widgets
+SET client_min_messages TO warning;
+CREATE EXTENSION IF NOT EXISTS pgtap;
+RESET client_min_messages;
+
+BEGIN;
+SELECT no_plan();
+-- SELECT plan(1);
+
+SET search_path TO corp,public;
+
+SELECT has_table('widgets');
+SELECT has_pk( 'widgets' );
+
+SELECT has_column(        'widgets', 'id' );
+SELECT col_type_is(       'widgets', 'id', 'SERIAL' );
+SELECT col_not_null(      'widgets', 'id' );
+SELECT col_hasnt_default( 'widgets', 'id' );
+
+SELECT has_column(        'widgets', 'name' );
+SELECT col_type_is(       'widgets', 'name', 'TEXT' );
+SELECT col_not_null(      'widgets', 'name' );
+SELECT col_hasnt_default( 'widgets', 'name' );
+
+SELECT has_column(        'widgets', 'quantity' );
+SELECT col_type_is(       'widgets', 'quantity', 'INTEGER' );
+SELECT col_not_null(      'widgets', 'quantity' );
+SELECT col_hasnt_default( 'widgets', 'quantity' );
+
+
+SELECT finish();
+ROLLBACK;
+</code></pre>
+
+<p>I don&rsquo;t know about you, but I&rsquo;ll be using this functionality <em>a lot.</em></p>
+]]></content>
+    </entry>
   
     <entry>
       
@@ -411,7 +584,7 @@ with a more capable one. Simply install <a href="http://tt2.org/">Template Toolk
 upgrade your Sqitch templates. Template Toolkit&rsquo;s comprehensive feature set
 covers just about any functionality you could want out of a templating system.
 It&rsquo;s big and complex, but relatively straight-forward to install: just run
-<code>cpan Template</code>, <code>cpanm Tempate</code>, <code>yum install perl-Template-Toolkit</code>, or the
+<code>cpan Template</code>, <code>cpanm Template</code>, <code>yum install perl-Template-Toolkit</code>, or the
 like and you&rsquo;ll be in business.</p>
 
 <p>We can resolve the trailing comma issue thanks to Template Toolkit&rsquo;s <code>loop</code>
