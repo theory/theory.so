@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sqitch | theory.so]]></title>
   <link href="http://theory.so/categories/sqitch/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2014-02-09T14:09:09-08:00</updated>
+  <updated>2014-02-09T14:10:27-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -46,7 +46,7 @@ command to have the new files opened in your editor.</p></li>
 <li><p>What is the call to <code>sqitch status</code> for? Since its output just goes to
 <code>/dev/null</code>, I don&rsquo;t understand the point.</p></li>
 <li><p>Also as of v0.990, you can <a href="/sqitch/2014/01/09/sqitch-on-target/" title="Sqitch on Target">specify Sqitch targets</a>. The <code>-d</code>, <code>-u</code>, and
-other options then override values in the target URI.`</p></li>
+other options then override values in the target URI.</p></li>
 <li><p>I <em>really</em> want to get Sqitch to <a href="https://github.com/theory/sqitch/issues/25" title="Add VCS Integration to Sqitch&quot;&lt;p&gt;&lt;a rel=&quot;bookmark&quot; href=&quot;http://theory.so/sqitch/2014/02/09/managing-sqitch-with-make/">better understand and work with VCSs</a>. An
 example would be to have it automatically <code>git add</code> files created by
 <code>sqitch add</code>. Another might be a Git config setting pointing to the Sqitch
