@@ -9,8 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="Back in September, I described how to create custom deploy, revert, and
-verify scripts for various types of Sqitch changes, such as adding a new &hellip;">
+  <meta name="description" content="chromatic: This saves me a few dozen keystrokes and a few seconds every time I make a
+database change. If that sounds trivial to you, good. A few &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +72,87 @@ verify scripts for various types of Sqitch changes, such as adding a new &hellip
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+  
+
+
+
+
+
+
+
+    <article data-linklog>
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="http://www.modernperlbooks.com/mt/2014/02/managing-sqitch-with-make.html">Managing Sqitch with Make</a>
+<span class='linklog-marker'>→</span>
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-09T13:58:00-08:00" pubdate data-updated="true"> 9 February 2014</time>
+        
+         &bull; <a rel="bookmark" href="/sqitch/2014/02/09/managing-sqitch-with-make/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>chromatic:</p>
+
+<blockquote><p>This saves me a few dozen keystrokes and a few seconds every time I make a
+database change. If that sounds trivial to you, good. A few keystrokes and a
+few seconds <em>are</em> trivial. My brainpower <em>isn&rsquo;t</em> trivial. Those keystrokes
+and seconds mean the difference between staying in the zone and fumbling
+around trying to remember commands I don&rsquo;t use all day every day. They save
+me minutes every time I use them, if you count the friction of switching
+between &ldquo;How do I do this in Sqitch again? What&rsquo;s the directory layout here?&rdquo;
+and &ldquo;What was I really working on?&rdquo;</p></blockquote>
+
+<p>Nice application of a <code>Makefile</code> to eliminate boilerplate. A couple of notes, though:</p>
+
+<p>Nice post. A couple comments and questions:</p>
+
+<ul>
+<li><p>As of Sqitch v0.990, you can pass the <code>--open-editor</code> option to the <code>add</code>
+command to have the new files opened in your editor.</p></li>
+<li><p>If you want to add a pgTAP test with a new change, see <a href="/sqitch/2014/01/13/templating-tests-with-sqitch/" title="Templating Tests with Sqitch">this post</a>.</p></li>
+<li><p>What is the call to <code>sqitch status</code> for? Since its output just goes to
+<code>/dev/null</code>, I don&rsquo;t understand the point.</p></li>
+<li><p>Also as of v0.990, you can <a href="/sqitch/2014/01/09/sqitch-on-target/" title="Sqitch on Target">specify Sqitch targets</a>. The <code>-d</code>, <code>-u</code>, and
+other options then override values in the target URI.`</p></li>
+<li><p>I <em>really</em> want to get Sqitch to <a href="https://github.com/theory/sqitch/issues/25" title="Add VCS Integration to Sqitch">better understand and work with VCSs</a>. An
+example would be to have it automatically <code>git add</code> files created by
+<code>sqitch add</code>. Another might be a Git config setting pointing to the Sqitch
+config file. Alas, I don&rsquo;t know when I will have the tuits to work on that.</p></li>
+</ul>
+
+
+<p>Lots of room for growth and improvement in Sqitch going forward. You post provides more food for thought.</p>
+</div>
+
+
+    </article>
   
     
     
@@ -1590,67 +1671,6 @@ templates as you like, and use them as appropriate.</p>
   <footer>
     <a rel="full-article" href="/sqitch/2013/09/06/sqitch-templating/">CONTINUE →</a>
   </footer>
-
-
-    </article>
-  
-    
-    
-
-
-
-  
-
-
-
-
-
-
-
-    <article data-linklog>
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="http://tapoueh.org/blog/2013/08/20-Window-Functions">Understanding Window Functions</a>
-<span class='linklog-marker'>→</span>
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-28T17:25:00-07:00" pubdate data-updated="true">28 August 2013</time>
-        
-         &bull; <a rel="bookmark" href="/pg/windows/2013/08/28/understanding-window-functions/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Dimitri Fontaine:</p>
-
-<blockquote><p>There was SQL before
-<a href="http://www.postgresql.org/docs/current/static/tutorial-window.html">window functions</a>
-and SQL after <em>window functions:</em> that&rsquo;s how powerful this tool is. Being
-that of a deal breaker unfortunately means that it can be quite hard to
-grasp the feature. This article aims at making it crystal clear so that you
-can begin using it today and are able to reason about it and recognize cases
-where you want to be using <em>window functions.</em></p></blockquote>
-
-<p>Great intro to a powerful feature.</p>
-</div>
 
 
     </article>

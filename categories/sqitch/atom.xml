@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sqitch | theory.so]]></title>
   <link href="http://theory.so/categories/sqitch/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2014-01-13T16:33:41-08:00</updated>
+  <updated>2014-02-09T14:09:09-08:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -12,6 +12,51 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[→ Managing Sqitch with Make]]></title>
+<link href="http://www.modernperlbooks.com/mt/2014/02/managing-sqitch-with-make.html"/>
+<updated>2014-02-09T13:58:00-08:00</updated>
+<id>http://theory.so/sqitch/2014/02/09/managing-sqitch-with-make</id>
+
+      <content type="html"><![CDATA[<p>chromatic:</p>
+
+<blockquote><p>This saves me a few dozen keystrokes and a few seconds every time I make a
+database change. If that sounds trivial to you, good. A few keystrokes and a
+few seconds <em>are</em> trivial. My brainpower <em>isn&rsquo;t</em> trivial. Those keystrokes
+and seconds mean the difference between staying in the zone and fumbling
+around trying to remember commands I don&rsquo;t use all day every day. They save
+me minutes every time I use them, if you count the friction of switching
+between &ldquo;How do I do this in Sqitch again? What&rsquo;s the directory layout here?&rdquo;
+and &ldquo;What was I really working on?&rdquo;</p></blockquote>
+
+<p>Nice application of a <code>Makefile</code> to eliminate boilerplate. A couple of notes, though:</p>
+
+<p>Nice post. A couple comments and questions:</p>
+
+<ul>
+<li><p>As of Sqitch v0.990, you can pass the <code>--open-editor</code> option to the <code>add</code>
+command to have the new files opened in your editor.</p></li>
+<li><p>If you want to add a pgTAP test with a new change, see <a href="/sqitch/2014/01/13/templating-tests-with-sqitch/" title="Templating Tests with Sqitch">this post</a>.</p></li>
+<li><p>What is the call to <code>sqitch status</code> for? Since its output just goes to
+<code>/dev/null</code>, I don&rsquo;t understand the point.</p></li>
+<li><p>Also as of v0.990, you can <a href="/sqitch/2014/01/09/sqitch-on-target/" title="Sqitch on Target">specify Sqitch targets</a>. The <code>-d</code>, <code>-u</code>, and
+other options then override values in the target URI.`</p></li>
+<li><p>I <em>really</em> want to get Sqitch to <a href="https://github.com/theory/sqitch/issues/25" title="Add VCS Integration to Sqitch&quot;&lt;p&gt;&lt;a rel=&quot;bookmark&quot; href=&quot;http://theory.so/sqitch/2014/02/09/managing-sqitch-with-make/">better understand and work with VCSs</a>. An
+example would be to have it automatically <code>git add</code> files created by
+<code>sqitch add</code>. Another might be a Git config setting pointing to the Sqitch
+config file. Alas, I don&rsquo;t know when I will have the tuits to work on that.</p></li>
+</ul>
+
+
+<p>Lots of room for growth and improvement in Sqitch going forward. You post provides more food for thought.</p>
+]]></content>
+    </entry>
   
     <entry>
       
