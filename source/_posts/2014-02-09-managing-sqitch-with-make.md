@@ -31,7 +31,7 @@ Nice post. A couple comments and questions:
   `/dev/null`, I don't understand the point.
 
 * Also as of v0.990, you can [specify Sqitch targets]. The `-d`, `-u`, and
-  other options then override values in the target URI.`
+  other options then override values in the target URI.
 
 * I *really* want to get Sqitch to [better understand and work with VCSs]. An
   example would be to have it automatically `git add` files created by
