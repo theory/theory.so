@@ -10,21 +10,21 @@ categories:
 I released [Sqitch] v0.996 today. Despite the minor version increase, this is
 a pretty big release. I'm busy knocking out all the stuff I want to get done
 for 1.0, but the version space is running out, so just a minor version jump
-from v0.995 to v0.997. But a lot changed. A couple the biggies:
+from v0.995 to v0.996. But a lot changed. A couple the biggies:
 
 ### Goodbye Mouse and Moose, Hello Moo ###
 
 If you're not a Perl programmer, you probably aren't familiar with [Moose] or
 its derivatives [Mouse] and [Moo]. Briefly, it's an object system. Great
 interface and features, but freaking *huge*—and *slow*. Mouse is a lighter
-version, and when we switched to it [last year], it yielded a 20-30% speed
+version, and when we (mostly) switched to it [last year], it yielded a 20-30% speed
 improvement.
 
 Still wasn't great, though. So on a day off recently, I switched
 to Moo, which implements most of Moose but without a lot of the baggage. At
 first, there wasn't much difference in performance, but as I profiled it
 ([Devel::NYTProf] is indispensable for profiling Perl apps, BTW), I was able
-to root out all trace of Moose or Mouse, including in other modules Sqitch
+to root out all trace of Moose or Mouse, including in CPAN modules Sqitch
 depends on. The result is around a 40% speedup over what we had before.
 Honestly, it feels like a new app, it's so fast. I'm really happy with how it
 turned out, and to have shed some of the baggage from the code base.
@@ -38,11 +38,13 @@ our internal Sqitch RPMs to build v0.996.
 The handling of MySQL passwords has also been improved. Sqitch now uses the
 `$MYSQL_PWD` environment variable if a password is provided in a target. This
 should simplify authentication when running MySQL change scripts through the
-`mysql` client client. Furthermore, if [MySQL::Config] is installed, Sqitch
-will also look for passwords in the `client` and `mysql` sections of your
-MySQL configuration files (`~/.my.cnf`, `/etc/my.cnf`). This should already
-happen automatically when executing scripts, but Sqitch now tries to replicate
-that behavior when connecting to the database via [DBI].
+`mysql` client client.
+
+Furthermore, if [MySQL::Config] is installed, Sqitch will look for passwords
+in the `client` and `mysql` sections of your MySQL configuration files
+(`~/.my.cnf`, `/etc/my.cnf`). This should already happen automatically when
+executing scripts, but Sqitch now tries to replicate that behavior when
+connecting to the database via [DBI].
 
 Spotting the `$MYSQL_PWD` commit, Ștefan Suciu updated the Firebird engine to
 use the `$ISC_PASSWORD` when running scripts. Awesome.
@@ -50,14 +52,15 @@ use the `$ISC_PASSWORD` when running scripts. Awesome.
 ### Vertically Integrated ###
 
 And finally, another big change: I added support for [Vertica], a very nice
-commercial column-store database that features partitioning and sharding
-support. It was originally forked from [PostgreSQL], so it was fairly
-straight-forward to port, though I did have to borrow a bit from the Oracle
-and SQLite engines, too. This port was essential for [work], as we're
-starting to use Vertical more and more, and need ways to manage changes.
+commercial column-store database that features partitioning and sharding,
+among other OLAP-style functionality. It was originally forked from
+[PostgreSQL], so it was fairly straight-forward to port, though I did have to
+borrow a bit from the Oracle and SQLite engines, too. This port was essential
+for [work], as we're starting to use Vertical more and more, and need ways to
+manage changes.
 
 If you're using Vertica, peruse [the tutorial] to get a feel for what it's
-all about. If you want to install it, you can install it from CPAN:
+all about. If you want to install it, you can get it from CPAN:
 
     cpan install App::Sqitch BDD::ODBC
 
@@ -85,9 +88,9 @@ That fix will be in the next release, of course, as will [support for Vertica 6]
 
 I need to focus on some other work stuff for a few weeks, but then I expect
 to come back to Sqitch again. I'd like to get 1.0 shipped before the end of
-the year. To that end, next up I will be [rationalizing configuration
-hierarchies] to make engine selection and deploy-time configuration more
-sensible. I hope to get that done by early October.
+the year. To that end, next up I will be [rationalizing configuration hierarchies]
+to make engine selection and deploy-time configuration more sensible. I hope
+to get that done by early October.
 
 [Sqitch]: http://sqitch.org/
 [Moose]: https://metacpan.org/module/Moose
