@@ -117,21 +117,21 @@ Sqitch Goes Vertical
   <div class="entry-content"><p>I released <a href="http://sqitch.org/">Sqitch</a> v0.996 today. Despite the minor version increase, this is
 a pretty big release. I&rsquo;m busy knocking out all the stuff I want to get done
 for 1.0, but the version space is running out, so just a minor version jump
-from v0.995 to v0.997. But a lot changed. A couple the biggies:</p>
+from v0.995 to v0.996. But a lot changed. A couple the biggies:</p>
 
 <h3>Goodbye Mouse and Moose, Hello Moo</h3>
 
 <p>If you&rsquo;re not a Perl programmer, you probably aren&rsquo;t familiar with <a href="https://metacpan.org/module/Moose">Moose</a> or
 its derivatives <a href="https://metacpan.org/module/Mouse">Mouse</a> and <a href="https://metacpan.org/module/Moo">Moo</a>. Briefly, it&rsquo;s an object system. Great
 interface and features, but freaking <em>huge</em>—and <em>slow</em>. Mouse is a lighter
-version, and when we switched to it <a href="https://github.com/theory/sqitch/pull/73">last year</a>, it yielded a 20-30% speed
+version, and when we (mostly) switched to it <a href="https://github.com/theory/sqitch/pull/73">last year</a>, it yielded a 20-30% speed
 improvement.</p>
 
 <p>Still wasn&rsquo;t great, though. So on a day off recently, I switched
 to Moo, which implements most of Moose but without a lot of the baggage. At
 first, there wasn&rsquo;t much difference in performance, but as I profiled it
 (<a href="https://metacpan.org/module/Devel::NYTProf">Devel::NYTProf</a> is indispensable for profiling Perl apps, BTW), I was able
-to root out all trace of Moose or Mouse, including in other modules Sqitch
+to root out all trace of Moose or Mouse, including in CPAN modules Sqitch
 depends on. The result is around a 40% speedup over what we had before.
 Honestly, it feels like a new app, it&rsquo;s so fast. I&rsquo;m really happy with how it
 turned out, and to have shed some of the baggage from the code base.</p>
@@ -145,11 +145,13 @@ our internal Sqitch RPMs to build v0.996.</p>
 <p>The handling of MySQL passwords has also been improved. Sqitch now uses the
 <code>$MYSQL_PWD</code> environment variable if a password is provided in a target. This
 should simplify authentication when running MySQL change scripts through the
-<code>mysql</code> client client. Furthermore, if <a href="https://metacpan.org/module/MySQL::Config">MySQL::Config</a> is installed, Sqitch
-will also look for passwords in the <code>client</code> and <code>mysql</code> sections of your
-MySQL configuration files (<code>~/.my.cnf</code>, <code>/etc/my.cnf</code>). This should already
-happen automatically when executing scripts, but Sqitch now tries to replicate
-that behavior when connecting to the database via <a href="https://metacpan.org/module/DBI">DBI</a>.</p>
+<code>mysql</code> client client.</p>
+
+<p>Furthermore, if <a href="https://metacpan.org/module/MySQL::Config">MySQL::Config</a> is installed, Sqitch will look for passwords
+in the <code>client</code> and <code>mysql</code> sections of your MySQL configuration files
+(<code>~/.my.cnf</code>, <code>/etc/my.cnf</code>). This should already happen automatically when
+executing scripts, but Sqitch now tries to replicate that behavior when
+connecting to the database via <a href="https://metacpan.org/module/DBI">DBI</a>.</p>
 
 <p>Spotting the <code>$MYSQL_PWD</code> commit, Ștefan Suciu updated the Firebird engine to
 use the <code>$ISC_PASSWORD</code> when running scripts. Awesome.</p>
@@ -157,14 +159,15 @@ use the <code>$ISC_PASSWORD</code> when running scripts. Awesome.</p>
 <h3>Vertically Integrated</h3>
 
 <p>And finally, another big change: I added support for <a href="https://my.vertica.com/">Vertica</a>, a very nice
-commercial column-store database that features partitioning and sharding
-support. It was originally forked from <a href="http://www.postgresql.org/">PostgreSQL</a>, so it was fairly
-straight-forward to port, though I did have to borrow a bit from the Oracle
-and SQLite engines, too. This port was essential for <a href="http://www.iovation.com/">work</a>, as we&rsquo;re
-starting to use Vertical more and more, and need ways to manage changes.</p>
+commercial column-store database that features partitioning and sharding,
+among other OLAP-style functionality. It was originally forked from
+<a href="http://www.postgresql.org/">PostgreSQL</a>, so it was fairly straight-forward to port, though I did have to
+borrow a bit from the Oracle and SQLite engines, too. This port was essential
+for <a href="http://www.iovation.com/">work</a>, as we&rsquo;re starting to use Vertical more and more, and need ways to
+manage changes.</p>
 
 <p>If you&rsquo;re using Vertica, peruse <a href="https://github.com/theory/sqitch/blob/master/lib/sqitchtutorial-vertica.pod">the tutorial</a> to get a feel for what it&rsquo;s
-all about. If you want to install it, you can install it from CPAN:</p>
+all about. If you want to install it, you can get it from CPAN:</p>
 
 <pre><code>cpan install App::Sqitch BDD::ODBC
 </code></pre>
@@ -195,9 +198,9 @@ it:</p>
 
 <p>I need to focus on some other work stuff for a few weeks, but then I expect
 to come back to Sqitch again. I&rsquo;d like to get 1.0 shipped before the end of
-the year. To that end, next up I will be <a href="https://github.com/theory/sqitch/issues/153">rationalizing configuration
-hierarchies</a> to make engine selection and deploy-time configuration more
-sensible. I hope to get that done by early October.</p>
+the year. To that end, next up I will be <a href="https://github.com/theory/sqitch/issues/153">rationalizing configuration hierarchies</a>
+to make engine selection and deploy-time configuration more sensible. I hope
+to get that done by early October.</p>
 </div>
 
 
