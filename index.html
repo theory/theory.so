@@ -9,8 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="chromatic: This saves me a few dozen keystrokes and a few seconds every time I make a
-database change. If that sounds trivial to you, good. A few &hellip;">
+  <meta name="description" content="I released Sqitch v0.996 today. Despite the minor version increase, this is
+a pretty big release. I&rsquo;m busy knocking out all the stuff I want to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +72,138 @@ database change. If that sounds trivial to you, good. A few &hellip;">
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+
+
+
+
+
+
+    <article >
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="/2014/09/05/sqitch-goes-vertical/">Sqitch Goes Vertical</a>
+
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-05T17:46:00-07:00" pubdate data-updated="true"> 5 September 2014</time>
+        
+         &bull; <a rel="bookmark" href="/2014/09/05/sqitch-goes-vertical/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>I released <a href="http://sqitch.org/">Sqitch</a> v0.996 today. Despite the minor version increase, this is
+a pretty big release. I&rsquo;m busy knocking out all the stuff I want to get done
+for 1.0, but the version space is running out, so just a minor version jump
+from v0.995 to v0.997. But a lot changed. A couple the biggies:</p>
+
+<h3>Goodbye Mouse and Moose, Hello Moo</h3>
+
+<p>If you&rsquo;re not a Perl programmer, you probably aren&rsquo;t familiar with <a href="https://metacpan.org/module/Moose">Moose</a> or
+its derivatives <a href="https://metacpan.org/module/Mouse">Mouse</a> and <a href="https://metacpan.org/module/Moo">Moo</a>. Briefly, it&rsquo;s an object system. Great
+interface and features, but freaking <em>huge</em>—and <em>slow</em>. Mouse is a lighter
+version, and when we switched to it <a href="https://github.com/theory/sqitch/pull/73">last year</a>, it yielded a 20-30% speed
+improvement.</p>
+
+<p>Still wasn&rsquo;t great, though. So on a day off recently, I switched
+to Moo, which implements most of Moose but without a lot of the baggage. At
+first, there wasn&rsquo;t much difference in performance, but as I profiled it
+(<a href="https://metacpan.org/module/Devel::NYTProf">Devel::NYTProf</a> is indispensable for profiling Perl apps, BTW), I was able
+to root out all trace of Moose or Mouse, including in other modules Sqitch
+depends on. The result is around a 40% speedup over what we had before.
+Honestly, it feels like a new app, it&rsquo;s so fast. I&rsquo;m really happy with how it
+turned out, and to have shed some of the baggage from the code base.</p>
+
+<p>The downside is that package maintainers will need to do some work to get the
+new dependencies built. Have a look at <a href="https://github.com/theory/sqitch/compare/v0.995...v0.996#diff-4">the RPM spec changes</a> I made to get
+our internal Sqitch RPMs to build v0.996.</p>
+
+<h3>MySQL Password Handling</h3>
+
+<p>The handling of MySQL passwords has also been improved. Sqitch now uses the
+<code>$MYSQL_PWD</code> environment variable if a password is provided in a target. This
+should simplify authentication when running MySQL change scripts through the
+<code>mysql</code> client client. Furthermore, if <a href="https://metacpan.org/module/MySQL::Config">MySQL::Config</a> is installed, Sqitch
+will also look for passwords in the <code>client</code> and <code>mysql</code> sections of your
+MySQL configuration files (<code>~/.my.cnf</code>, <code>/etc/my.cnf</code>). This should already
+happen automatically when executing scripts, but Sqitch now tries to replicate
+that behavior when connecting to the database via <a href="https://metacpan.org/module/DBI">DBI</a>.</p>
+
+<p>Spotting the <code>$MYSQL_PWD</code> commit, Ștefan Suciu updated the Firebird engine to
+use the <code>$ISC_PASSWORD</code> when running scripts. Awesome.</p>
+
+<h3>Vertically Integrated</h3>
+
+<p>And finally, another big change: I added support for <a href="https://my.vertica.com/">Vertica</a>, a very nice
+commercial column-store database that features partitioning and sharding
+support. It was originally forked from <a href="http://www.postgresql.org/">PostgreSQL</a>, so it was fairly
+straight-forward to port, though I did have to borrow a bit from the Oracle
+and SQLite engines, too. This port was essential for <a href="http://www.iovation.com/">work</a>, as we&rsquo;re
+starting to use Vertical more and more, and need ways to manage changes.</p>
+
+<p>If you&rsquo;re using Vertica, peruse <a href="https://github.com/theory/sqitch/blob/master/lib/sqitchtutorial-vertica.pod">the tutorial</a> to get a feel for what it&rsquo;s
+all about. If you want to install it, you can install it from CPAN:</p>
+
+<pre><code>cpan install App::Sqitch BDD::ODBC
+</code></pre>
+
+<p>Or, if you&rsquo;re on Homebrew:</p>
+
+<pre><code>brew tap theory/sqitch
+brew install sqitch_vertica
+</code></pre>
+
+<p>Be warned that there&rsquo;s a minor bug in v0.996, though. Apply this diff to fix
+it:</p>
+
+<pre><code>@@ -16,7 +16,7 @@ our $VERSION = '0.996';
+
+ sub key    { 'vertica' }
+ sub name   { 'Vertica' }
+-sub driver { 'DBD::Pg 2.0' }
++sub driver { 'DBD::ODBC 1.43' }
+ sub default_client { 'vsql' }
+
+ has '+destination' =&gt; (
+</code></pre>
+
+<p>That fix will be in the next release, of course, as will <a href="https://github.com/theory/sqitch/commit/4f8dbaa236a04f6dd1ec762250ffd8481078691a">support for Vertica 6</a>.</p>
+
+<h3>What Next?</h3>
+
+<p>I need to focus on some other work stuff for a few weeks, but then I expect
+to come back to Sqitch again. I&rsquo;d like to get 1.0 shipped before the end of
+the year. To that end, next up I will be <a href="https://github.com/theory/sqitch/issues/153">rationalizing configuration
+hierarchies</a> to make engine selection and deploy-time configuration more
+sensible. I hope to get that done by early October.</p>
+</div>
+
+
+    </article>
   
     
     
@@ -1599,78 +1731,6 @@ support for more data formats, such as <a href="http://docs.hortonworks.com/HDPD
 way to go. But Impala will be a nice alternative if it can get fault tolerance
 figured out. I&rsquo;m disappointed it&rsquo;s not on the road map.</p>
 </div>
-
-
-    </article>
-  
-    
-    
-
-
-
-
-
-
-
-
-
-    <article >
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="/sqitch/2013/09/06/sqitch-templating/">Sqitch Templating</a>
-
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-06T13:44:00-07:00" pubdate data-updated="true"> 6 September 2013</time>
-        
-         &bull; <a rel="bookmark" href="/sqitch/2013/09/06/sqitch-templating/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Last week saw the v.980 release of <a href="http://sqitch.org/" title="Sane database change management">Sqitch</a>, a database change management
-system. The headline feature in this version is support for <a href="http://dev.mysql.com/" title="The world's most popular open source database">MySQL</a> 5.6.4 or
-higher. Why 5.6.4 rather than 5.1 or even 5.5? Mainly because 5.6.4 finally
-added support for fractional seconds in <code>DATETIME</code> columns (details in the
-<a href="https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-4.html" title="Changes in MySQL 5.6.4 (2011-12-20, Milestone 7)">release notes</a>). This feature is essential for Sqitch, because changes often
-execute within a second of each other, and the deploy time is included in the
-log table&rsquo;s primary key.</p>
-
-<p>With the requirement for fractional seconds satisfied by 5.6.4, there was
-nothing to prevent usage of <a href="http://dev.mysql.com/doc/refman/5.5/en/condition-handling.html" title="MySQL 5.5 Reference Manual: Condition Handling"><code>SIGNAL</code></a>, added in 5.5, to
-<a href="http://stackoverflow.com/a/17424570/79202" title="How do I get MySQL to throw a conditional runtime exception in SQL">mimic check constraints</a> in a trigger. This brings the Sqitch MySQL
-implementation into line with what was already possible in the Postgres,
-SQLite, and Oracle support. Check out the <a href="https://metacpan.org/module/sqitchtutorial-mysql" title="A tutorial introduction to Sqitch change management on MySQL">tutorial</a> and the accompanying
-<a href="https://github.com/theory/sqitch-mysql-intro" title="Sqitch MySQL Intro Sample Repository">Git repository</a> to get started managing your MySQL databases with Sqitch.</p>
-
-<p>The MySQL support might be the headliner, but the change in v0.980 I&rsquo;m most
-excited about is improved template support. Sqitch executes templates to
-create the default deploy, revert, and verify scripts, but up to now they have
-not been easy to customize. With v0.980, you can create as many custom
-templates as you like, and use them as appropriate.</p>
-
-</div>
-  <footer>
-    <a rel="full-article" href="/sqitch/2013/09/06/sqitch-templating/">CONTINUE →</a>
-  </footer>
 
 
     </article>

@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Sqitch Goes Vertical - theory.so</title>
+  <meta name="author" content="David E. Wheeler">
+
+  
+  <meta name="description" content="I released Sqitch v0.996 today. Despite the minor version increase, this is
+a pretty big release. I&rsquo;m busy knocking out all the stuff I want to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://theory.so/2014/09/05/sqitch-goes-vertical">
+  <link href="/favicon.ico" rel="icon">
+  
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="theory.so" type="application/atom+xml">
+  
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-43606412-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h2><a href="/"><img src="/images/logo.png" alt="≡" /></a></h2>
+  <h1><a href="/">theory.so</a></h1>
+</hgroup>
+
+</header>
+  <nav role="navigation">
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:theory.so" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/archives">Archives</a></li>
+  <li><a href="http://pgxn.org/user/theory">PGXN</a></li>
+  <li><a href="/about/">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+
+
+
+
+
+
+
+
+
+
+<article class="hentry" role="article" >
+  
+  <header>
+    <h1 class="entry-title">
+
+Sqitch Goes Vertical
+
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-05T17:46:00-07:00" pubdate data-updated="true"> 5 September 2014</time>
+        
+         &bull; <a rel="bookmark" href="/2014/09/05/sqitch-goes-vertical/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>I released <a href="http://sqitch.org/">Sqitch</a> v0.996 today. Despite the minor version increase, this is
+a pretty big release. I&rsquo;m busy knocking out all the stuff I want to get done
+for 1.0, but the version space is running out, so just a minor version jump
+from v0.995 to v0.997. But a lot changed. A couple the biggies:</p>
+
+<h3>Goodbye Mouse and Moose, Hello Moo</h3>
+
+<p>If you&rsquo;re not a Perl programmer, you probably aren&rsquo;t familiar with <a href="https://metacpan.org/module/Moose">Moose</a> or
+its derivatives <a href="https://metacpan.org/module/Mouse">Mouse</a> and <a href="https://metacpan.org/module/Moo">Moo</a>. Briefly, it&rsquo;s an object system. Great
+interface and features, but freaking <em>huge</em>—and <em>slow</em>. Mouse is a lighter
+version, and when we switched to it <a href="https://github.com/theory/sqitch/pull/73">last year</a>, it yielded a 20-30% speed
+improvement.</p>
+
+<p>Still wasn&rsquo;t great, though. So on a day off recently, I switched
+to Moo, which implements most of Moose but without a lot of the baggage. At
+first, there wasn&rsquo;t much difference in performance, but as I profiled it
+(<a href="https://metacpan.org/module/Devel::NYTProf">Devel::NYTProf</a> is indispensable for profiling Perl apps, BTW), I was able
+to root out all trace of Moose or Mouse, including in other modules Sqitch
+depends on. The result is around a 40% speedup over what we had before.
+Honestly, it feels like a new app, it&rsquo;s so fast. I&rsquo;m really happy with how it
+turned out, and to have shed some of the baggage from the code base.</p>
+
+<p>The downside is that package maintainers will need to do some work to get the
+new dependencies built. Have a look at <a href="https://github.com/theory/sqitch/compare/v0.995...v0.996#diff-4">the RPM spec changes</a> I made to get
+our internal Sqitch RPMs to build v0.996.</p>
+
+<h3>MySQL Password Handling</h3>
+
+<p>The handling of MySQL passwords has also been improved. Sqitch now uses the
+<code>$MYSQL_PWD</code> environment variable if a password is provided in a target. This
+should simplify authentication when running MySQL change scripts through the
+<code>mysql</code> client client. Furthermore, if <a href="https://metacpan.org/module/MySQL::Config">MySQL::Config</a> is installed, Sqitch
+will also look for passwords in the <code>client</code> and <code>mysql</code> sections of your
+MySQL configuration files (<code>~/.my.cnf</code>, <code>/etc/my.cnf</code>). This should already
+happen automatically when executing scripts, but Sqitch now tries to replicate
+that behavior when connecting to the database via <a href="https://metacpan.org/module/DBI">DBI</a>.</p>
+
+<p>Spotting the <code>$MYSQL_PWD</code> commit, Ștefan Suciu updated the Firebird engine to
+use the <code>$ISC_PASSWORD</code> when running scripts. Awesome.</p>
+
+<h3>Vertically Integrated</h3>
+
+<p>And finally, another big change: I added support for <a href="https://my.vertica.com/">Vertica</a>, a very nice
+commercial column-store database that features partitioning and sharding
+support. It was originally forked from <a href="http://www.postgresql.org/">PostgreSQL</a>, so it was fairly
+straight-forward to port, though I did have to borrow a bit from the Oracle
+and SQLite engines, too. This port was essential for <a href="http://www.iovation.com/">work</a>, as we&rsquo;re
+starting to use Vertical more and more, and need ways to manage changes.</p>
+
+<p>If you&rsquo;re using Vertica, peruse <a href="https://github.com/theory/sqitch/blob/master/lib/sqitchtutorial-vertica.pod">the tutorial</a> to get a feel for what it&rsquo;s
+all about. If you want to install it, you can install it from CPAN:</p>
+
+<pre><code>cpan install App::Sqitch BDD::ODBC
+</code></pre>
+
+<p>Or, if you&rsquo;re on Homebrew:</p>
+
+<pre><code>brew tap theory/sqitch
+brew install sqitch_vertica
+</code></pre>
+
+<p>Be warned that there&rsquo;s a minor bug in v0.996, though. Apply this diff to fix
+it:</p>
+
+<pre><code>@@ -16,7 +16,7 @@ our $VERSION = '0.996';
+
+ sub key    { 'vertica' }
+ sub name   { 'Vertica' }
+-sub driver { 'DBD::Pg 2.0' }
++sub driver { 'DBD::ODBC 1.43' }
+ sub default_client { 'vsql' }
+
+ has '+destination' =&gt; (
+</code></pre>
+
+<p>That fix will be in the next release, of course, as will <a href="https://github.com/theory/sqitch/commit/4f8dbaa236a04f6dd1ec762250ffd8481078691a">support for Vertica 6</a>.</p>
+
+<h3>What Next?</h3>
+
+<p>I need to focus on some other work stuff for a few weeks, but then I expect
+to come back to Sqitch again. I&rsquo;d like to get 1.0 shipped before the end of
+the year. To that end, next up I will be <a href="https://github.com/theory/sqitch/issues/153">rationalizing configuration
+hierarchies</a> to make engine selection and deploy-time configuration more
+sensible. I hope to get that done by early October.</p>
+</div>
+
+
+  <footer>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://theory.so/2014/09/05/sqitch-goes-vertical/" data-via="theory" data-counturl="http://theory.so/2014/09/05/sqitch-goes-vertical/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="false" data-layout="button_count" data-width="200" data-show-faces="false"></div>
+  
+  
+  <span class="adn-post"><a href="https://alpha.app.net/intent/post/?url=/2014/09/05/sqitch-goes-vertical/&text=theory.so: “Sqitch Goes Vertical”" class="adn-button" target="_blank" data-type="share" data-width="132" data-height="20" data-text="theory.so: “Sqitch Goes Vertical”" data-url="/2014/09/05/sqitch-goes-vertical/" >Share on App.net</a></span>
+  <script>(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//d2zh9g63fcvyrq.cloudfront.net/adn.js";fjs.parentNode.insertBefore(js,fjs);}}(document, "script", "adn-button-js"));</script>
+  
+</div>
+
+    
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn"><a href="/about" title="About the author (David E. Wheeler)" rel="author">David E. Wheeler</a></span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-05T17:46:00-07:00" pubdate data-updated="true"> 5 September 2014</time>
+      
+
+
+    </p>
+          <div class="follow_buttons_byline">
+
+  <a href="http://twitter.com/theory" class="twitter-follow-button" data-show-count="true">Follow @theory</a>
+
+
+   <a href="https://alpha.app.net/intent/follow/?user_id=%40theory" class="adn-button" target="_blank" data-type="follow" data-width="277" data-height="20" data-user-id="@theory" data-show-count="1" data-show-username="1">Follow me on App.net</a>
+<script src="//d2zh9g63fcvyrq.cloudfront.net/adn.js"></script>
+
+      </div>
+
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/sqitch/2014/02/09/managing-sqitch-with-make/" title="Previous Post: Managing Sqitch with Make">&laquo; Managing Sqitch with Make</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 – David E. Wheeler –
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> –
+  <a href="/atom.xml" title="Subscribe to theory.com">Feed</a>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'theoryso';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://theory.so/2014/09/05/sqitch-goes-vertical/';
+        var disqus_url = 'http://theory.so/2014/09/05/sqitch-goes-vertical/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
