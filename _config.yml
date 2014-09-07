@@ -109,8 +109,3 @@ google_analytics_tracking_id: UA-43606412-1
 
 # Facebook Like
 facebook_like: true
-
-# App.net
-adn_user: theory
-adn_follow_button: true
-adn_post_button: true
