@@ -9,8 +9,8 @@
   <meta name="author" content="David E. Wheeler">
 
   
-  <meta name="description" content="I released Sqitch v0.996 today. Despite the minor version increase, this is
-a pretty big release. I&rsquo;m busy knocking out all the stuff I want to &hellip;">
+  <meta name="description" content="Yours truly was feature in this week&rsquo;s episode of FLOSS Weekly, talking
+about Sqitch. I feel pretty good about this intereview, despite &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +72,76 @@ a pretty big release. I&rsquo;m busy knocking out all the stuff I want to &helli
   <div id="main">
     <div id="content">
       <div class="blog-index">
+  
+    
+    
+
+
+
+  
+
+
+
+
+
+
+
+    <article data-linklog>
+      
+  <header>
+    <h1 class="entry-title">
+
+<a href="http://twit.tv/show/floss-weekly/309">Sqitch on FLOSS Weekly</a>
+<span class='linklog-marker'>→</span>
+</h1>
+
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-09-17T20:42:00-07:00" pubdate data-updated="true">17 September 2014</time>
+        
+         &bull; <a rel="bookmark" href="/2014/09/17/sqitch-on-floss-weekly/">§</a>
+      </p>
+    
+  </header>
+
+
+
+  <div class="entry-content"><p>Yours truly was feature in this week&rsquo;s episode of <a href="http://twit.tv/floss">FLOSS Weekly</a>, talking
+about Sqitch. I feel pretty good about this intereview, despite continually
+banging on my legs, the table, and the mic. It&rsquo;s interesting to try to
+communicate what Sqitch is about purely by talking.</p>
+
+<iframe src="//twit.tv/embed/17143" width="640" height="360" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+
+
+<p>If it&rsquo;s enough to get you interested in giving a try, try [installing it] and
+using working through one of the tutorials:</p>
+
+<ul>
+<li><a href="https://metacpan.org/module/sqitchtutorial%20%22Sqitch%20PostgreSQL%20Tutorial">PostgreSQL</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-sqlite%20%22Sqitch%20SQLite%20Tutorial">SQLite</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-oracle%20%22Sqitch%20Oracle%20Tutorial">Oracle</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-mysql%20%22Sqitch%20MySQL%20Tutorial">MySQL</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-firebird%20%22Sqitch%20Firebird%20Tutorial">Firebird</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-vertica%20%22Sqitch%20Vertica%20Tutorial">Vertica</a></li>
+</ul>
+
+</div>
+
+
+    </article>
   
     
     
@@ -1648,91 +1718,6 @@ data.</p></blockquote>
 them during the PostgreSQL 8.2 era. Today they&rsquo;re a core feature, and as of
 9.1, you can even modify their values! You&rsquo;re missing out if you&rsquo;re not using
 them yet.</p>
-</div>
-
-
-    </article>
-  
-    
-    
-
-
-
-  
-
-
-
-
-
-
-
-    <article data-linklog>
-      
-  <header>
-    <h1 class="entry-title">
-
-<a href="http://blog.cloudera.com/blog/2013/09/whats-next-for-impala-after-release-1-1/">Whither Impala Fault Tolerance?</a>
-<span class='linklog-marker'>→</span>
-</h1>
-
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-09-29T14:29:00-07:00" pubdate data-updated="true">29 September 2013</time>
-        
-         &bull; <a rel="bookmark" href="/impala/2013/09/29/whither-impala-fault-tolerance/">§</a>
-      </p>
-    
-  </header>
-
-
-
-  <div class="entry-content"><p>Justin Erickson on the <a href="http://blog.cloudera.com/">Cloudera Blog</a></p>
-
-<blockquote><p>In December 2012, while Cloudera Impala was still in its beta phase, we
-<a href="http://blog.cloudera.com/blog/2012/12/whats-next-for-cloudera-impala/">provided a roadmap</a>
-for planned functionality in the production release. In the same spirit of
-keeping Impala users, customers, and enthusiasts well informed, this post
-provides an updated roadmap for upcoming releases later this year and in early
-2014.</p></blockquote>
-
-<p><a href="http://www.cloudera.com/content/cloudera/en/products/cdh/impala.html">Impala</a> is a pretty nice-looking SQLish query engine that runs on Hadoop. It
-provides the same basic interface as <a href="http://hive.apache.org/">Hive</a>, but circumvents MapReduce to
-access data directly from data nodes in parallel. But, in my opinion, to be
-useful as a real-time query engine, it needs fault tolerance. From the
-<a href="http://www.cloudera.com/content/cloudera-content/cloudera-docs/Impala/latest/Cloudera-Impala-Frequently-Asked-Questions/Cloudera-Impala-Frequently-Asked-Questions.html">Impala FAQ</a>, under the list of unsupported features:</p>
-
-<blockquote><p>Fault tolerance for running queries (not currently). In the current release,
-Impala aborts the query if any host on which the query is executing fails. In
-the future, we will consider adding fault tolerance to Impala, so that a
-running query would complete even in the presence of host failures.</p></blockquote>
-
-<p>Sounds like an unfortunate issue. Since it&rsquo;s pretty typical for data nodes to
-go down, this seems like an essential feature. Products like <a href="http://citusdata.com/docs/sql-on-hadoop" title="CitusDB SQL on Hadoop">CitusDB</a> offer
-fault tolerance:</p>
-
-<blockquote><p><strong>Does CitusDB recover from failures?</strong></p>
-
-<p>Yes. The CitusDB master node intelligently re-routes the work on any failed
-nodes to the remaining nodes in real-time. Since the underlying data are kept
-in fixed-size blocks in HDFS, a failed node&rsquo;s work can evenly be distributed
-among the remaining nodes in the cluster.</p></blockquote>
-
-<p>That sound exactly right. I&rsquo;m excited about Citus, and if it adds solid
-support for more data formats, such as <a href="http://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.0.0.2/ds_Hive/orcfile.html" title="ORC File Format">ORC</a> and <a href="http://parquet.io/" title="Parquet is a columnar storage format for Hadoop.">Parquet</a>, it may well be the
-way to go. But Impala will be a nice alternative if it can get fault tolerance
-figured out. I&rsquo;m disappointed it&rsquo;s not on the road map.</p>
 </div>
 
 
