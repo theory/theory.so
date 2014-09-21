@@ -4,7 +4,7 @@
   <title><![CDATA[theory.so]]></title>
   <link href="http://theory.so/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2014-09-17T21:09:20-07:00</updated>
+  <updated>2014-09-21T14:49:02-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -22,10 +22,10 @@
 <title type="html"><![CDATA[→ Sqitch on FLOSS Weekly]]></title>
 <link href="http://twit.tv/show/floss-weekly/309"/>
 <updated>2014-09-17T20:42:00-07:00</updated>
-<id>http://theory.so/2014/09/17/sqitch-on-floss-weekly</id>
+<id>http://theory.so/podcast/2014/09/17/sqitch-on-floss-weekly</id>
 
       <content type="html"><![CDATA[<p>Yours truly was feature in this week&rsquo;s episode of <a href="http://twit.tv/floss">FLOSS Weekly</a>, talking
-about Sqitch. I feel pretty good about this intereview, despite continually
+about Sqitch. I feel pretty good about this interview, despite continually
 banging on my legs, the table, and the mic. It&rsquo;s interesting to try to
 communicate what Sqitch is about purely by talking.</p>
 
@@ -44,7 +44,7 @@ using working through one of the tutorials:</p>
 <li><a href="https://metacpan.org/module/sqitchtutorial-vertica%20%22Sqitch%20Vertica%20Tutorial">Vertica</a></li>
 </ul>
 
-<p><a rel="bookmark" href="http://theory.so/2014/09/17/sqitch-on-floss-weekly/">§</a></p>]]></content>
+<p><a rel="bookmark" href="http://theory.so/podcast/2014/09/17/sqitch-on-floss-weekly/">§</a></p>]]></content>
     </entry>
   
     <entry>

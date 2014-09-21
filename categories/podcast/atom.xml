@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: podcast | theory.so]]></title>
+  <link href="http://theory.so/categories/podcast/atom.xml" rel="self"/>
+  <link href="http://theory.so/"/>
+  <updated>2014-09-21T14:49:02-07:00</updated>
+  <id>http://theory.so/</id>
+  <author>
+    <name><![CDATA[David E. Wheeler]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+    <entry>
+      
+
+
+
+
+<title type="html"><![CDATA[→ Sqitch on FLOSS Weekly]]></title>
+<link href="http://twit.tv/show/floss-weekly/309"/>
+<updated>2014-09-17T20:42:00-07:00</updated>
+<id>http://theory.so/podcast/2014/09/17/sqitch-on-floss-weekly</id>
+
+      <content type="html"><![CDATA[<p>Yours truly was feature in this week&rsquo;s episode of <a href="http://twit.tv/floss">FLOSS Weekly</a>, talking
+about Sqitch. I feel pretty good about this interview, despite continually
+banging on my legs, the table, and the mic. It&rsquo;s interesting to try to
+communicate what Sqitch is about purely by talking.</p>
+
+<iframe src="http://theory.so//twit.tv/embed/17143" width="640" height="360" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+
+
+<p>If it&rsquo;s enough to get you interested in giving a try, try [installing it] and
+using working through one of the tutorials:</p>
+
+<ul>
+<li><a href="https://metacpan.org/module/sqitchtutorial%20%22Sqitch%20PostgreSQL%20Tutorial">PostgreSQL</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-sqlite%20%22Sqitch%20SQLite%20Tutorial">SQLite</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-oracle%20%22Sqitch%20Oracle%20Tutorial">Oracle</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-mysql%20%22Sqitch%20MySQL%20Tutorial">MySQL</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-firebird%20%22Sqitch%20Firebird%20Tutorial">Firebird</a></li>
+<li><a href="https://metacpan.org/module/sqitchtutorial-vertica%20%22Sqitch%20Vertica%20Tutorial">Vertica</a></li>
+</ul>
+
+
+<p><a rel="bookmark" href="http://theory.so/podcast/2014/09/17/sqitch-on-floss-weekly/">§</a></p>
+
+]]></content>
+    </entry>
+  
+</feed>
+
