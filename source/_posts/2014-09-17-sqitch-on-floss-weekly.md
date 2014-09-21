@@ -4,11 +4,11 @@ title: "Sqitch on FLOSS Weekly"
 date: 2014-09-17 20:42
 comments: true
 external-url: http://twit.tv/show/floss-weekly/309
-categories: 
+categories: podcast
 ---
 
 Yours truly was feature in this week's episode of [FLOSS Weekly], talking
-about Sqitch. I feel pretty good about this intereview, despite continually
+about Sqitch. I feel pretty good about this interview, despite continually
 banging on my legs, the table, and the mic. It's interesting to try to
 communicate what Sqitch is about purely by talking.
 
