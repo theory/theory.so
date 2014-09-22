@@ -12,7 +12,7 @@ about Sqitch. I feel pretty good about this interview, despite continually
 banging on my legs, the table, and the mic. It's interesting to try to
 communicate what Sqitch is about purely by talking.
 
-<iframe src="//twit.tv/embed/17143" width="640" height="360" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+<iframe src="//twit.tv/embed/17143" width="100%" frameborder="0" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
 
 If it's enough to get you interested in giving a try, try [installing it] and
 using working through one of the tutorials:
