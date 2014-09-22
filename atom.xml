@@ -4,7 +4,7 @@
   <title><![CDATA[theory.so]]></title>
   <link href="http://theory.so/atom.xml" rel="self"/>
   <link href="http://theory.so/"/>
-  <updated>2014-09-21T14:49:02-07:00</updated>
+  <updated>2014-09-22T10:41:26-07:00</updated>
   <id>http://theory.so/</id>
   <author>
     <name><![CDATA[David E. Wheeler]]></name>
@@ -29,7 +29,7 @@ about Sqitch. I feel pretty good about this interview, despite continually
 banging on my legs, the table, and the mic. It&rsquo;s interesting to try to
 communicate what Sqitch is about purely by talking.</p>
 
-<iframe src="http://theory.so//twit.tv/embed/17143" width="640" height="360" frameborder="0" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
+<iframe src="http://theory.so//twit.tv/embed/17143" width="100%" frameborder="0" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
 
 
 <p>If it&rsquo;s enough to get you interested in giving a try, try [installing it] and
